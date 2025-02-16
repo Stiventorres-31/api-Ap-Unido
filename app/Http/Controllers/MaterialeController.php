@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Helpers\ResponseHelper;
+use App\Models\Materiale;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+
+class MaterialeController extends Controller
+{
+    public function index()
+    {
+        try {
+            $materiale = Materiale::where("estado", "A")->get();
+            return ResponseHelper::success(
+                200,
+                "Se ha obtenido todos los materiales",
+                ["materiales" => $materiale]
+            );
+        } catch (\Throwable $th) {
+            Log::error("Error al obtener todos los materiales " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "referencia_material" => "required|unique:materiales,referencia_material",
+            "nombre_material" => "required|unique:materiales,nombre_material"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+
+            $materiale = Materiale::create([
+                "referencia_material" => $request->referencia_material,
+                "nombre_material" => strtoupper(trim($request->nombre_material)),
+                "user_id" => Auth::user()->id
+            ]);
+            return ResponseHelper::success(200, "Se ha registrado con exito", ["materiale" => $materiale]);
+        } catch (\Throwable $th) {
+            Log::error("Error al registrar un material " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
+
+    public function edit(Request $request, $referencia_material)
+    {
+        $validator = Validator::make($request->all(), [
+            "nombre_material" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+        try {
+            $materiale = Materiale::where("referencia_material", $referencia_material)->first();
+            if (!$materiale) {
+                return ResponseHelper::error(404, "Material no encontrado");
+            }
+            $materiale->nombre_material =strtoupper(trim($request->nombre_material));
+            $materiale->save();
+
+            return ResponseHelper::success(200, "Se ha actualizado con exito", ["materiale" => $materiale]);
+        } catch (\Throwable $th) {
+            Log::error("Error al actualizar un material " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
+
+    public function show($referencia_material)
+    {
+        $validator = Validator::make(["referencia_material" => $referencia_material], [
+            "referencia_material" => "required|exists:materiales,referencia_material"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+        try {
+            $materiale = Materiale::with("inventarios")->where("referencia_material", $referencia_material)->first();
+
+            return ResponseHelper::success(200, "Se ha encontrado", ["materiale" => $materiale]);
+        } catch (\Throwable $th) {
+            Log::error("Error al consultar un material " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
+
+  
+
+    public function destroy(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "referencia_material" => "required|exists:materiales,referencia_material"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+
+        try {
+            $materiale = Materiale::where("referencia_material", $request->referencia_material)->first();
+
+            //TENGO QUE VALIDAR SI EXISTE EL MATERIAL EN UNA ASIGNACION Y/O PRESPUESTO PARA PDOERLO ELIMINAR
+            $materiale->estado = "I";
+            $materiale->save();
+            return ResponseHelper::success(200, "Se ha eliminado con exito");
+        } catch (\Throwable $th) {
+            Log::error("Error al eliminar un material " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
+}
