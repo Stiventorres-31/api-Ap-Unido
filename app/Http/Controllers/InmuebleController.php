@@ -10,14 +10,18 @@ use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use League\Csv\Writer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class InmuebleController extends Controller
 {
     public function index()
     {
         try {
-            $inmuebles = Inmueble::with(["proyecto","tipo_inmueble","usuario"])->where("estado", "A")->get();
+            $inmuebles = Inmueble::with(["proyecto", "tipo_inmueble", "usuario"])->where("estado", "A")->get();
             return ResponseHelper::success(200, "Se ha obtenido todos los inmuebles", ["inmuebles" => $inmuebles]);
         } catch (\Throwable $th) {
             Log::error("Error al obtener todos los inmuebles " . $th->getMessage());
@@ -42,9 +46,9 @@ class InmuebleController extends Controller
         }
 
         $proyecto = Proyecto::select("id")
-        ->where("codigo_proyecto",$request->codigo_proyecto)
-        ->first();
-        
+            ->where("codigo_proyecto", $request->codigo_proyecto)
+            ->first();
+
 
         try {
             for ($i = 0; $i < $request->cantidad_inmueble; $i++) {
@@ -71,10 +75,10 @@ class InmuebleController extends Controller
     {
         try {
             $inmueble = Inmueble::where("estado", "A")
-            ->with(["tipo_inmueble","usuario","proyecto","presupuestos.materiale", "asignaciones"])
-            ->withSum("presupuestos as total_presupuesto","subtotal")
-            //->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
-            ->find($id);
+                ->with(["tipo_inmueble", "usuario", "proyecto", "presupuestos.materiale", "asignaciones"])
+                ->withSum("presupuestos as total_presupuesto", "subtotal")
+                //->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
+                ->find($id);
 
             if (!$inmueble) {
                 return ResponseHelper::error(404, "No se ha encontrado");
@@ -95,7 +99,8 @@ class InmuebleController extends Controller
         }
     }
 
-    public function destroy(Request $request){
+    public function destroy(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             "id" => "required|exists:inmuebles,id"
         ]);
@@ -106,18 +111,20 @@ class InmuebleController extends Controller
 
         try {
             $inmueble = Inmueble::where("estado", "A")
-            ->find($request->id);
+                ->find($request->id);
 
             if (!$inmueble) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
 
-            $presupuestos = Presupuesto::where("inmueble_id",$request->inmueble_id)->exists();
-            $asignaciones = Asignacione::where("inmueble_id",$request->inmueble_id)->exists();
+            $presupuestos = Presupuesto::where("inmueble_id", $request->inmueble_id)->exists();
+            $asignaciones = Asignacione::where("inmueble_id", $request->inmueble_id)->exists();
 
-            if($presupuestos || $asignaciones){
-                return ResponseHelper::error(400, 
-                "No se puede eliminar este inmueble porque tiene información relacionada");
+            if ($presupuestos || $asignaciones) {
+                return ResponseHelper::error(
+                    400,
+                    "No se puede eliminar este inmueble porque tiene información relacionada"
+                );
             }
 
 
@@ -131,6 +138,74 @@ class InmuebleController extends Controller
             );
         } catch (\Throwable $th) {
             Log::error("Error al consultar un inmueble " . $th->getMessage());
+            return ResponseHelper::error(
+                500,
+                "Error interno en el servidor",
+                ["error" => $th->getMessage()]
+            );
+        }
+    }
+
+    public function generarReporte($id)
+    {
+        $validator = Validator::make(["id" => $id], [
+            "id" => "required|exists:inmuebles,id",
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $inmueble = Inmueble::with(["proyecto","tipo_inmueble","presupuestos.materiale.inventarios"])->find($id);
+
+           
+
+
+            $archivoCSV = Writer::createFromString('');
+            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+            $archivoCSV->insertOne([
+                "codigo_proyecto",
+                // "inmueble_id",
+                "referencia_material",
+                "mombre_material",
+                "costo del material",
+                "Cantidad del material"
+            ]);
+
+            foreach ($inmueble->presupuestos as $presupuesto) {
+                $archivoCSV->insertOne([
+                    $inmueble->proyecto->codigo_proyecto,
+                    // $presupuesto["inmueble_id"],
+                    $presupuesto["materiale"]["referencia_material"],
+                    $presupuesto["materiale"]["nombre_material"],
+                    $presupuesto["costo_material"],
+                    $presupuesto["cantidad_material"],
+                ]);
+            }
+            $response = new StreamedResponse(function () use ($archivoCSV) {
+                echo $archivoCSV->toString();
+            });
+            
+            // Establece las cabeceras adecuadas
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
+            
+            return $response;
+            // $headers = [
+            //     'Content-Type' => 'text/csv',
+            //     'Content-Disposition' => 'attachment; filename="reporte_tipo_inmuebles.csv"',
+            // ];
+
+            $csvContent = (string) $archivoCSV;
+            $filePath = 'reports/reporte_presupuesto.csv';
+            Storage::put($filePath, $csvContent);
+            return response()->download(storage_path("app/{$filePath}"))->deleteFileAfterSend(true);
+
+            //return ResponseHelper::success(201, "Se ha generado con exito", ["inmueble" => $filePath]);
+        } catch (Throwable $th) {
+            Log::error("error al generar el reporte " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",

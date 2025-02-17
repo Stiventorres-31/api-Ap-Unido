@@ -68,8 +68,10 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/", [InmuebleController::class, "index"]);
         Route::get("/{id}", [InmuebleController::class, "show"]);
         Route::post("/", [InmuebleController::class, "store"]);
+        Route::get("/report/{id}", [InmuebleController::class, "generarReporte"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
         Route::delete("/", [InmuebleController::class, 'destroy']);
+
     });
 
     Route::prefix('presupuesto')->group(function () {
@@ -90,3 +92,4 @@ Route::middleware("auth:api")->group(function(){
         // Route::delete("/", [PresupuestoController::class, 'destroy']);
     });
 });
+
