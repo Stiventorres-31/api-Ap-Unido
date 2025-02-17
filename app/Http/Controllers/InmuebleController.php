@@ -33,7 +33,7 @@ class InmuebleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
-            "tipo_inmueble_id" => "required|exists:tipo_inmuebles,id",
+            "tipo_inmueble" => "required|exists:tipo_inmuebles,nombre_tipo_inmueble",
             "cantidad_inmueble" => "required|integer"
         ]);
 
@@ -42,12 +42,13 @@ class InmuebleController extends Controller
         }
 
         $proyecto = Proyecto::select("id")->where("codigo_proyecto",$request->codigo_proyecto)->first();
+        $tipo_inmueble = Proyecto::select("id")->where("nombre_tipo_inmueble",$request->tipo_inmueble)->first();
 
         try {
             for ($i = 0; $i < $request->cantidad_inmueble; $i++) {
                 Inmueble::create([
                     "proyecto_id" => $proyecto->id,
-                    "tipo_inmueble_id" => $request->tipo_inmueble_id,
+                    "tipo_inmueble_id" => $tipo_inmueble->id,
                     "user_id" => Auth::user()->id,
                     "estado" => "A"
                 ]);
