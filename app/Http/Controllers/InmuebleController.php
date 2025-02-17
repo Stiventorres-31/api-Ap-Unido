@@ -41,7 +41,9 @@ class InmuebleController extends Controller
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
 
-        $proyecto = Proyecto::select("id")->where("codigo_proyecto",$request->codigo_proyecto)->first();
+        $proyecto = Proyecto::select("id")
+        ->where("codigo_proyecto",$request->codigo_proyecto)
+        ->first();
         
 
         try {
@@ -69,8 +71,10 @@ class InmuebleController extends Controller
     {
         try {
             $inmueble = Inmueble::where("estado", "A")
-            ->with(["tipo_inmueble","usuario","proyecto"])
+            ->with(["tipo_inmueble","usuario","proyecto","presupuestos", "asignaciones"])
+            ->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
             ->find($id);
+
             if (!$inmueble) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
