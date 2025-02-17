@@ -103,7 +103,12 @@ class MaterialeController extends Controller
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
         try {
-            $materiale = Materiale::with("inventarios")->where("referencia_material", $referencia_material)->first();
+            $materiale = Materiale::with(['inventarios' => function ($query) {
+                $query->where('estado', 'Activo');
+            }])
+            ->where('referencia_material', $referencia_material)
+            ->first();
+            
 
             return ResponseHelper::success(200, "Se ha encontrado", ["materiale" => $materiale]);
         } catch (\Throwable $th) {

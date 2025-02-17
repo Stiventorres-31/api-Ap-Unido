@@ -145,7 +145,7 @@ class InventarioController extends Controller
             return ResponseHelper::success(
                 200,
                 "Se ha eliminado con exito",
-                ["inventario" => $inventario]
+                []
             );
         } catch (\Throwable $th) {
             Log::error("Error al eliminar un inventario " . $th->getMessage());
