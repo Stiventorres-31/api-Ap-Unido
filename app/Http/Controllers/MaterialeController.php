@@ -15,7 +15,7 @@ class MaterialeController extends Controller
     public function index()
     {
         try {
-            $materiale = Materiale::with("usuarios")
+            $materiale = Materiale::with("usuario")
             ->where("estado", "A")
             ->get();
             return ResponseHelper::success(

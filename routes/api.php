@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AsignacioneController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\InventarioController;
@@ -74,6 +75,15 @@ Route::middleware("auth:api")->group(function(){
         // Route::get("/", [PresupuestoController::class, "index"]);
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
         Route::post("/", [PresupuestoController::class, "store"]);
+        Route::post("/file", [PresupuestoController::class, "fileMasivo"]);
+        // Route::put("/{id}", [PresupuestoController::class, "edit"]);
+        // Route::delete("/", [PresupuestoController::class, 'destroy']);
+    });
+
+    Route::prefix('asignacion')->group(function () {
+        // Route::get("/", [PresupuestoController::class, "index"]);
+        // Route::get("/{id}", [PresupuestoController::class, "show"]);
+        Route::post("/", [AsignacioneController::class, "store"]);
         Route::post("/file", [PresupuestoController::class, "fileMasivo"]);
         // Route::put("/{id}", [PresupuestoController::class, "edit"]);
         // Route::delete("/", [PresupuestoController::class, 'destroy']);
