@@ -82,6 +82,7 @@ class PresupuestoController extends Controller
                     "proyecto_id" => $proyecto->id,
                     "materiale_id" => $datosMateriale->id,
                     "cantidad_material" => $materiale["cantidad_material"],
+                    "costo_material" => $materiale["costo_material"],
                     "subtotal" => $materiale["cantidad_material"] * $materiale["costo_material"],
                     "user_id" => Auth::user()->id
 
