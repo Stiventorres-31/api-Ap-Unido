@@ -104,7 +104,7 @@ class MaterialeController extends Controller
         }
         try {
             $materiale = Materiale::with(['inventarios' => function ($query) {
-                $query->where('estado', 'Activo');
+                $query->where("estado", "A");
             }])
             ->where('referencia_material', $referencia_material)
             ->first();
