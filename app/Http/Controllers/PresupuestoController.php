@@ -21,7 +21,7 @@ class PresupuestoController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "inmueble_id" => "required|exists:inmuebles,id",
-            "proyecto_id" => "required|exists:proyectos,id",
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
             "materiales" => "required|array",
 
         ]);
@@ -40,8 +40,11 @@ class PresupuestoController extends Controller
                 DB::rollBack();
                 return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
             }
-            $existencia = Presupuesto::where("inmueble_id", $request->inmueble_id)
-                ->where("proyecto_id", $request->proyecto_id)
+            $proyecto = Proyecto::where("codigo_proyecto",$request->codigo_proyecto)
+            ->where("estado","A")
+            ->first();
+            $existencia = Presupuesto::where("inmueble_id", intval($request->inmueble_id))
+                ->where("proyecto_id", $proyecto->id)
                 ->where("materiale_id", $materiale["materiale_id"])->exists();
 
             if ($existencia) {
@@ -54,15 +57,15 @@ class PresupuestoController extends Controller
             }
             try {
                 Presupuesto::create([
-                    "inmueble_id" => $request->inmueble_id,
-                    "proyecto_id" => $request->proyecto_id,
+                    "inmueble_id" => intval($request->inmueble_id),
+                    "proyecto_id" => $proyecto->id,
                     "materiale_id" => $materiale["materiale_id"],
                     "cantidad_material" => $materiale["cantidad_material"],
                     "subtotal" => $materiale["cantidad_material"] * $materiale["costo_material"],
                     "user_id" => Auth::user()->id
 
                 ]);
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 DB::rollBack();
                 Log::error("Error al registrar un presupuesto " . $th->getMessage());
                 return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
