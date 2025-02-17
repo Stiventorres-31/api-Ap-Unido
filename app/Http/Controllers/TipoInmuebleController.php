@@ -72,7 +72,7 @@ class TipoInmuebleController extends Controller
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
         try {
-            $tipo_inmueble = TipoInmueble::findOrFail($id);
+            $tipo_inmueble = TipoInmueble::with("usuario")->find($id);
 
             return ResponseHelper::success(
                 200,
