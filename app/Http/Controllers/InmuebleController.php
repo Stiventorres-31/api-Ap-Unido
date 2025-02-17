@@ -48,7 +48,7 @@ class InmuebleController extends Controller
             for ($i = 0; $i < $request->cantidad_inmueble; $i++) {
                 Inmueble::create([
                     "proyecto_id" => $proyecto->id,
-                    "tipo_inmueble_id" => intval($request->tipo_inmueble_id),
+                    "tipo_inmueble_id" => intval($request->tipo_inmueble),
                     "user_id" => Auth::user()->id,
                     "estado" => "A"
                 ]);
