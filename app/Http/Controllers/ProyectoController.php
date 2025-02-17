@@ -45,15 +45,18 @@ class ProyectoController extends Controller
 
     public function showWithAsignacion($codigo_proyecto){
         try {
-            $proyecto = Proyecto::with(['inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
+            $proyecto = Proyecto::with(["inmuebles"=> function ($query) {
+                $query->where("estado", "A");
+            },'inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
             ->where("codigo_proyecto",$codigo_proyecto)
+        
             ->first();
 
             //$presupuesto = Presupuesto::all();
            // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
            // return $proyecto;
 
-//ME FALTA MOSTRAR SOLO LOS INMUEBLES ACTIVOS
+            //ME FALTA MOSTRAR SOLO LOS INMUEBLES ACTIVOS
             if (!$proyecto) {
                 return ResponseHelper::error(404, "Proyecto no encontrado");
             }
