@@ -13,6 +13,9 @@ class Inmueble extends Model
         'tipo_inmueble_id',
     ];
 
+    public function usuario(){
+        return $this->belongsTo(User::class);
+    }
     public function tipo_inmueble(){
         return $this->belongsTo(TipoInmueble::class);
     }

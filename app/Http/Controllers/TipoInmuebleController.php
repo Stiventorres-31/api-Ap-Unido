@@ -14,7 +14,8 @@ class TipoInmuebleController extends Controller
     public function index()
     {
         try {
-            $tipo_inmuebles = TipoInmueble::where("estado", "A")->get();
+            $tipo_inmuebles = TipoInmueble::with("usuario")
+            ->where("estado", "A")->get();
 
             return ResponseHelper::success(
                 200,

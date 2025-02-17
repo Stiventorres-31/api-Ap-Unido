@@ -84,6 +84,16 @@ class ProyectoController extends Controller
             );
         }
     }
+    public function select()
+    {
+        try {
+            $proyecto = Proyecto::select("id", "codigo_proyecto")->where("estado", "A")->get();
+            return ResponseHelper::success(200, "Proyectos", $proyecto);
+        } catch (Throwable $th) {
+            Log::error("error en el select del proyecto " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor");
+        }
+    }
 
     public function store(Request $request)
     {

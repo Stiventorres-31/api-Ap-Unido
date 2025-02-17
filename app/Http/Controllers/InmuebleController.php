@@ -16,7 +16,7 @@ class InmuebleController extends Controller
     public function index()
     {
         try {
-            $inmuebles = Inmueble::where("estado", "A")->get();
+            $inmuebles = Inmueble::with(["proyecto","tipo_inmueble","usuario"])->where("estado", "A")->get();
             return ResponseHelper::success(200, "Se ha obtenido todos los inmuebles", ["inmuebles" => $inmuebles]);
         } catch (\Throwable $th) {
             Log::error("Error al obtener todos los inmuebles " . $th->getMessage());
@@ -64,7 +64,9 @@ class InmuebleController extends Controller
     public function show($id)
     {
         try {
-            $inmueble = Inmueble::where("estado", "A")->with(["tipo_inmueble","usuario"])->find($id);
+            $inmueble = Inmueble::where("estado", "A")
+            ->with(["tipo_inmueble","usuario","proyecto"])
+            ->find($id);
             if (!$inmueble) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }

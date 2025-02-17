@@ -48,27 +48,26 @@ class AsignacioneController extends Controller
                     return ResponseHelper::error(422, $validatedData->errors()->first(), $validatedData->errors());
                 }
 
-                // $existenciaAsingacion = Asignacione::where("referencia_material", strtoupper(trim($material["referencia_material"])))
-                //     ->where("codigo_proyecto", strtoupper(trim($request->codigo_proyecto)))
-                //     ->where("consecutivo", $material["consecutivo"])
-                //     ->exists();
+                $existenciaAsingacion = Asignacione::where("materiale_id", strtoupper(trim($material["materiale_id"])))
+                    ->where("consecutivo", $material["consecutivo"])
+                    ->exists();
 
 
-                // if ($existenciaAsingacion) {
-                //     DB::rollBack();
-                //     return ResponseHelper::error(500, 
-                //     "Ya existe asignación del material '{$material["referencia_material"]}' con lote '{$material["consecutivo"]}'");
-                // }
+                if ($existenciaAsingacion) {
+                    DB::rollBack();
+                    return ResponseHelper::error(500, 
+                    "Ya existe asignación del material '{$material["materiale_id"]}' con lote '{$material["consecutivo"]}'");
+                }
 
-                $existenciaAsignacione=Asignacione::where("");
+                
                 //VALIDAR EXISTENCIA ENTRE EL MATERIAL Y EL PRESUPUESTO DEL PROYECTO
-                $datosPresupuesto = Presupuesto::where("referencia_material", strtoupper(trim($material["referencia_material"])))
-                    ->where("codigo_proyecto", strtoupper(trim($request->codigo_proyecto)))->first();
+                $datosPresupuesto = Presupuesto::where("materiale_id", strtoupper(trim($material["materiale_id"])))
+                    ->where("proyecto_id", strtoupper(trim($request->proyecto_id)))->first();
 
 
                 if (!$datosPresupuesto) {
                     DB::rollBack();
-                    return ResponseHelper::error(422, "El material '{$material["referencia_material"]}' no pertenece al presupesto del proyecto '{$request->codigo_proyecto}'");
+                    return ResponseHelper::error(422, "El material '{$material["materiale_id"]}' no pertenece al presupesto del proyecto '{$request->proyecto_id}'");
                 }
 
 
@@ -77,27 +76,28 @@ class AsignacioneController extends Controller
                     DB::rollBack();
                     return ResponseHelper::error(
                         422,
-                        "El material '{$material["referencia_material"]}' sobre pasa la cantidad del presupuesto"
+                        "El material '{$material["materiale_id"]}' sobre pasa la cantidad del presupuesto"
                     );
                 }
                 //return $datosPresupuesto->cantidad_material;
 
-                $estadoMaterial = Materiale::where("referencia_material", $material["referencia_material"])
-                    ->where("estado", "A")
-                    ->first();
+                $estadoMaterial = Materiale::find($material["materiale_id"])
+                    ->where("estado", "A");
 
                 if (!$estadoMaterial) {
                     DB::rollBack();
                     return ResponseHelper::error(
                         404,
-                        "El material '{$material["referencia_material"]}' no existe"
+                        "El material '{$material["materiale_id"]}' no existe"
                     );
                 }
 
                 //OBTENGO EL INVENTARIO DE LA REFERENCIA DEL MATERIAL CON EL CONSECUTIVO
-                $inventario = Inventario::where("referencia_material", $material["referencia_material"])
+                $inventario = Inventario::where("materiale_id", $material["materiale_id"])
                     ->where("consecutivo", $material["consecutivo"])
+                    ->where("estado","A")
                     ->first();
+
                 if (!$inventario) {
                     DB::rollBack();
                     return ResponseHelper::error(404, "No se encontró inventario para el material '{$material["referencia_material"]}' con el consecutivo '{$material["consecutivo"]}'");
@@ -115,13 +115,13 @@ class AsignacioneController extends Controller
 
                 Asignacione::create([
                     "inmueble_id" => $request->inmueble_id,
-                    "codigo_proyecto" => strtoupper($request->codigo_proyecto),
-                    "referencia_material" => $inventario->referencia_material,
+                    "proyecto_id" => strtoupper($request->proyecto_id),
+                    "materiale_id" => $inventario->materiale_id,
                     "costo_material" => $inventario->costo,
                     "consecutivo" => $inventario->consecutivo,
                     "subtotal" => $inventario->costo * $material["cantidad_material"],
                     "cantidad_material" => $material["cantidad_material"],
-                    "numero_identificacion" => Auth::user()->numero_identificacion
+                    "user_id" => Auth::user()->id
                 ]);
                 DB::table('inventarios')
                     ->where("referencia_material", $material["referencia_material"])
