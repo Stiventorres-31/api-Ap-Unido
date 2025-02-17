@@ -19,7 +19,7 @@ class Proyecto extends Model
     ];
 
     public function usuario(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,"user_id");
     }
     public function inmuebles(){
         return $this->hasMany(Inmueble::class);
