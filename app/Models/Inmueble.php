@@ -23,4 +23,8 @@ class Inmueble extends Model
     public function presupuestos(){
         return $this->hasMany(Presupuesto::class);
     }
+
+    public function asignaciones(){
+        return $this->hasMany(Asignacione::class);
+    }
 }

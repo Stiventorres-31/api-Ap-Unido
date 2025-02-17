@@ -75,5 +75,9 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Presupuesto::class);
     }
 
+    public function asignaciones(){
+        return $this->hasMany(Asignacione::class);
+    }
+
     
 }

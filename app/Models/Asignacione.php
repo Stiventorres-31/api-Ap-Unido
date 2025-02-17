@@ -17,4 +17,19 @@ class Asignacione extends Model
         'subtotal',
         'estado'
     ];
+
+    public function usuario(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function materiale(){
+        return $this->belongsTo(Materiale::class);
+    }
+
+    public function proyecto(){
+        return $this->belongsTo(Proyecto::class);
+    }
+    public function inmueble(){
+        return $this->belongsTo(Inmueble::class);
+    }
 }

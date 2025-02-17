@@ -66,7 +66,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/{id}", [InmuebleController::class, "show"]);
         Route::post("/", [InmuebleController::class, "store"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
-        // Route::delete("/", [InmuebleController::class, 'destroy']);
+        Route::delete("/", [InmuebleController::class, 'destroy']);
     });
 
     Route::prefix('presupuesto')->group(function () {

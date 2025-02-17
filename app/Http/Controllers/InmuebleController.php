@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\Asignacione;
 use App\Models\Inmueble;
+use App\Models\Presupuesto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -67,6 +69,50 @@ class InmuebleController extends Controller
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
 
+            return ResponseHelper::success(
+                200,
+                "Se ha encontrado",
+                ["inmueble" => $inmueble]
+            );
+        } catch (\Throwable $th) {
+            Log::error("Error al consultar un inmueble " . $th->getMessage());
+            return ResponseHelper::error(
+                500,
+                "Error interno en el servidor",
+                ["error" => $th->getMessage()]
+            );
+        }
+    }
+
+    public function destroy(Request $request){
+        $validator = Validator::make($request->all(), [
+            "id" => "required|exists:inmuebles,id"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $inmueble = Inmueble::where("estado", "A")
+            ->find($request->id);
+
+            if (!$inmueble) {
+                return ResponseHelper::error(404, "No se ha encontrado");
+            }
+
+            $presupuestos = Presupuesto::where("inmueble_id",$request->inmueble_id)->exists();
+            $asignaciones = Asignacione::where("inmueble_id",$request->inmueble_id)->exists();
+
+            if($presupuestos || $asignaciones){
+                return ResponseHelper::error(400, 
+                "No se puede eliminar este inmueble porque tiene información relacionada");
+            }
+
+
+            $inmueble->estado = "I";
+            $inmueble->save();
+            
             return ResponseHelper::success(
                 200,
                 "Se ha encontrado",
