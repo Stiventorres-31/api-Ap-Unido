@@ -115,7 +115,7 @@ class ProyectoController extends Controller
                 "Se ha registrado con exito",
                 ["proyectos" => $proyectos]
             );
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error("Error al registrar un proyecto " . $th->getMessage());
             return ResponseHelper::error(
                 500,

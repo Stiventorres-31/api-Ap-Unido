@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\Inventario;
 use App\Models\Materiale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,11 @@ class MaterialeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "referencia_material" => "required|unique:materiales,referencia_material",
-            "nombre_material" => "required|unique:materiales,nombre_material"
+            "nombre_material" => "required|unique:materiales,nombre_material",
+            "costo" => "required",
+            "cantidad" => "required",
+            "nit_proveedor" => "required",
+            "nombre_proveedor" => "required"
         ]);
 
         if ($validator->fails()) {
@@ -44,6 +49,19 @@ class MaterialeController extends Controller
                 "nombre_material" => strtoupper(trim($request->nombre_material)),
                 "user_id" => Auth::user()->id
             ]);
+
+            $consecutivoActual = Inventario::where("materiale_id", $materiale->id)->max("consecutivo");
+            // return $consecutivoActual;
+            $inventario = Inventario::create([
+                "materiale_id" => $materiale->id,
+                "consecutivo" => $consecutivoActual + 1,
+                "costo" => $request->costo,
+                "cantidad" => $request->cantidad,
+                "nit_proveedor" => $request->nit_proveedor,
+                "nombre_proveedor" => strtoupper(trim($request->nombre_proveedor)),
+                "user_id"=>Auth::user()->id
+            ]);
+            $inventario->save();
             return ResponseHelper::success(200, "Se ha registrado con exito", ["materiale" => $materiale]);
         } catch (\Throwable $th) {
             Log::error("Error al registrar un material " . $th->getMessage());
@@ -65,7 +83,7 @@ class MaterialeController extends Controller
             if (!$materiale) {
                 return ResponseHelper::error(404, "Material no encontrado");
             }
-            $materiale->nombre_material =strtoupper(trim($request->nombre_material));
+            $materiale->nombre_material = strtoupper(trim($request->nombre_material));
             $materiale->save();
 
             return ResponseHelper::success(200, "Se ha actualizado con exito", ["materiale" => $materiale]);
@@ -94,7 +112,7 @@ class MaterialeController extends Controller
         }
     }
 
-  
+
 
     public function destroy(Request $request)
     {
