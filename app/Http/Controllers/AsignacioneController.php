@@ -20,8 +20,8 @@ class AsignacioneController extends Controller
     {
 
         $validatedData = Validator::make($request->all(), [
-            "inmueble_id" => 'required|integer|exists:inmuebles,id',
-            "proyecto_id" => "required|integer|exists:proyectos,id",
+            "inmueble_id" => 'required|numeric|exists:inmuebles,id',
+            "proyecto_id" => "required|numeric|exists:proyectos,id",
             "materiales" => "required|array",
         ]);
 
@@ -36,9 +36,9 @@ class AsignacioneController extends Controller
 
             foreach ($request->materiales as $material) {
                 $validatedData = Validator::make($material, [
-                    "materiale_id"  => "required|string|max:10|exists:materiales,id",
-                    "consecutivo" => "required|size:0",
-                    "cantidad_material"    => "required|numeric|size:0"
+                    "materiale_id"  => "required|numeric|max:10|exists:materiales,id",
+                    "consecutivo" => "required|numeric",
+                    "cantidad_material"    => "required|numeric|min:1"
                 ]);
 
 
@@ -100,15 +100,16 @@ class AsignacioneController extends Controller
 
                 if (!$inventario) {
                     DB::rollBack();
-                    return ResponseHelper::error(404, "No se encontró inventario para el material '{$material["referencia_material"]}' con el consecutivo '{$material["consecutivo"]}'");
+                    return ResponseHelper::error(404, "No se encontró inventario para el material '{$material["materiale_id"]}' con el consecutivo '{$material["consecutivo"]}'");
                 }
 
                 if ($inventario->cantidad < $material["cantidad_material"]) {
                     DB::rollBack();
-                    return ResponseHelper::error(400, "No ha suficiente stock para la cantidad requerida del material '{$material["referencia_material"]}'");
+                    return ResponseHelper::error(400, "No ha suficiente stock para la cantidad requerida del material '{$material["materiale_id"]}'");
                 }
 
 
+               // return $inventario;
                 //$inventario->decrement("cantidad", 4);
 
 
@@ -124,7 +125,7 @@ class AsignacioneController extends Controller
                     "user_id" => Auth::user()->id
                 ]);
                 DB::table('inventarios')
-                    ->where("referencia_material", $material["referencia_material"])
+                    ->where("materiale_id", $material["materiale_id"])
                     ->where("consecutivo", $material["consecutivo"])
                     ->decrement("cantidad", $material["cantidad_material"]);
             }
@@ -133,8 +134,8 @@ class AsignacioneController extends Controller
             return ResponseHelper::success(201, "Se ha registrado con exito");
         } catch (Throwable $th) {
             DB::rollBack();
-            Log::error("Error al registrar asignaciones " . $th);
-            return ResponseHelper::error(500, "Error interno en el servidor");
+            Log::error("Error al registrar asignaciones " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor",["error"=>$th->getMessage()]);
         }
     }
 }

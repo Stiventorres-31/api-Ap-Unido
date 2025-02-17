@@ -42,6 +42,34 @@ class ProyectoController extends Controller
             return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
         }
     }
+
+    public function showWithAsignacion($codigo_proyecto){
+        try {
+            $proyecto = Proyecto::with(['inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
+            ->where("codigo_proyecto",$codigo_proyecto)
+            ->first();
+
+            //$presupuesto = Presupuesto::all();
+           // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
+           // return $proyecto;
+
+//ME FALTA MOSTRAR SOLO LOS INMUEBLES ACTIVOS
+            if (!$proyecto) {
+                return ResponseHelper::error(404, "Proyecto no encontrado");
+            }
+            $proyectoArray = $proyecto->toArray();
+
+            foreach ($proyectoArray['inmuebles'] as $inmueble) {
+                $inmueble['total_asignacion'] = collect($inmueble['asignaciones'] ?? [])->sum('subtotal');
+                unset($inmueble['asignaciones']);
+            }
+
+            return ResponseHelper::success(200, "Proyecto obtenido", ["proyecto" => $proyectoArray]);
+        } catch (Throwable $th) {
+            Log::error("error al consultar un proyecto con el presupuesto " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
+        }
+    }
     public function index()
     {
         try {
