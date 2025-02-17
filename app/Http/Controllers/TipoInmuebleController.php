@@ -121,23 +121,23 @@ class TipoInmuebleController extends Controller
         }
     }
 
-    public function destroy($id){
-        $validator = Validator::make(["id",$id], [
-            "nombre_tipo_inmueble" => "required|exists:tipo_inmuebles,nombre_tipo_inmueble",
+    public function destroy(Request $request){
+        $validator = Validator::make($request->all(), [
+            "id" => "required|exists:tipo_inmuebles,id",
         ]);
         if ($validator->fails()) {
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
         try {
 
-            $tipo_inmueble = TipoInmueble::findOrFail($id);
+            $tipo_inmueble = TipoInmueble::find($request->id);
             $tipo_inmueble->estado = "I" ;
-            $tipo_inmueble->save();
+            $tipo_inmueble->save(); 
 
             return ResponseHelper::success(
                 200,
                 "Se ha eliminado con exito",
-                ["tipo_inmueble" => $tipo_inmueble]
+                []
             );
         } catch (\Throwable $th) {
             Log::error("Error al eliminar un tipo de inmueble " . $th->getMessage());
