@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId("proyecto_id")->references("id")->on("proyectos");
             $table->foreignId("user_id")->references("id")->on( "users");
 
-            $table->unique(["inmueble_id","materiale_id","proyecto_id","consecutivo"],"llave_unida");
+            $table->unique(["inmueble_id","materiale_id","consecutivo"],"llave_unida");
             $table->timestamps();
         });
     }

@@ -103,7 +103,7 @@ class TipoInmuebleController extends Controller
             if(!$tipo_inmueble){
                 return ResponseHelper::error(404,"No se ha encontrado");
             }
-            $tipo_inmueble->nombre_tipo_inmueble = $request->nombre_tipo_inmueble;
+            $tipo_inmueble->nombre_tipo_inmueble = strtoupper(trim($request->nombre_tipo_inmueble));
             $tipo_inmueble->save();
 
             return ResponseHelper::success(

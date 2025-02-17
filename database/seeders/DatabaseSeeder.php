@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        //User::factory(1)->create();
-        //TipoInmueble::factory(1)->create();
+        User::factory(1)->create();
+        TipoInmueble::factory(1)->create();
         Materiale::factory(3)->create();
     }
 }

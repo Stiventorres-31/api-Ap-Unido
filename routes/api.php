@@ -85,7 +85,7 @@ Route::middleware("auth:api")->group(function(){
         // Route::get("/", [PresupuestoController::class, "index"]);
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
         Route::post("/", [AsignacioneController::class, "store"]);
-        Route::post("/file", [PresupuestoController::class, "fileMasivo"]);
+        Route::post("/file", [AsignacioneController::class, "fileMasivo"]);
         // Route::put("/{id}", [PresupuestoController::class, "edit"]);
         // Route::delete("/", [PresupuestoController::class, 'destroy']);
     });

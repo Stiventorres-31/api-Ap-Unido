@@ -6,6 +6,7 @@ use App\Helpers\ResponseHelper;
 use App\Models\Asignacione;
 use App\Models\Inmueble;
 use App\Models\Presupuesto;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,7 @@ class InmuebleController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "proyecto_id" => "required|exists:proyectos,id",
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
             "tipo_inmueble_id" => "required|exists:tipo_inmuebles,id",
             "cantidad_inmueble" => "required|integer"
         ]);
@@ -40,10 +41,12 @@ class InmuebleController extends Controller
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
 
+        $proyecto = Proyecto::select("id")->where("codigo_proyecto",$request->codigo_proyecto)->first();
+
         try {
             for ($i = 0; $i < $request->cantidad_inmueble; $i++) {
                 Inmueble::create([
-                    "proyecto_id" => $request->proyecto_id,
+                    "proyecto_id" => $proyecto->id,
                     "tipo_inmueble_id" => $request->tipo_inmueble_id,
                     "user_id" => Auth::user()->id,
                     "estado" => "A"

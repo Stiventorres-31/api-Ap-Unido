@@ -31,9 +31,9 @@ class UserFactory extends Factory
         //     'remember_token' => Str::random(10),
         // ];
         return [
-            'nombre_completo' => "SUPER ADMIN",
+            'nombre_completo' => "STIVEN TORRES",
             'numero_identificacion' => "1001946338",
-            'rol_usuario' => "STIVEN TORRES",
+            'rol_usuario' => "SUPER ADMIN",
             'password' => 'password',
             'estado' => "A",
         ];
