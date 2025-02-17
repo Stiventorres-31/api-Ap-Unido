@@ -57,6 +57,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/{codigo_proyecto}", [ProyectoController::class, "show"]);
         Route::post("/", [ProyectoController::class, "store"]);
         Route::put("/{codigo_proyecto}", [ProyectoController::class, "edit"]);
+        Route::get("/presupuesto/{codigo_proyecto}", [ProyectoController::class, "showWithPresupuesto"]);
         Route::delete("/", [ProyectoController::class, 'destroy']);
     });
 
@@ -72,6 +73,7 @@ Route::middleware("auth:api")->group(function(){
         // Route::get("/", [PresupuestoController::class, "index"]);
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
         Route::post("/", [PresupuestoController::class, "store"]);
+        Route::post("/file", [PresupuestoController::class, "fileMasivo"]);
         // Route::put("/{id}", [PresupuestoController::class, "edit"]);
         // Route::delete("/", [PresupuestoController::class, 'destroy']);
     });

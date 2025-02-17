@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal("costo_material");
             $table->decimal("subtotal");
             $table->decimal("cantidad_material");
+            $table->bigInteger("consecutivo");
             
             $table->foreignId("inmueble_id")->references("id")->on("inmuebles");
             $table->foreignId("materiale_id")->references("id")->on("materiales");

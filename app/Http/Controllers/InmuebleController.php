@@ -62,7 +62,7 @@ class InmuebleController extends Controller
     public function show($id)
     {
         try {
-            $inmueble = Inmueble::where("estado", "A")->find($id);
+            $inmueble = Inmueble::where("estado", "A")->with("presupuesto")->find($id);
             if (!$inmueble) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }

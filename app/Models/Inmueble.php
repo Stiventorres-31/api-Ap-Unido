@@ -20,7 +20,7 @@ class Inmueble extends Model
         return $this->belongsTo(Proyecto::class);
     }
 
-    public function presupuesto(){
-        return $this->hasOne(Presupuesto::class);
+    public function presupuestos(){
+        return $this->hasMany(Presupuesto::class);
     }
 }
