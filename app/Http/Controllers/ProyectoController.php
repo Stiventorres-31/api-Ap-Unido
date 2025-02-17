@@ -18,9 +18,17 @@ class ProyectoController extends Controller
     public function showWithPresupuesto($codigo_proyecto)
     {
         try {
-            $proyecto = Proyecto::with(['inmuebles.presupuestos', 'inmuebles.tipo_inmueble'])
-                ->where("codigo_proyecto", $codigo_proyecto)
-                ->first();
+            $proyecto = Proyecto::with([
+                'inmuebles' => function ($query) {
+                    $query->with('tipo_inmueble')
+                          ->withSum('presupuestos as total_presupuesto', 'subtotal');
+                },
+                'inmuebles.presupuestos'
+            ])
+            ->where('codigo_proyecto', $codigo_proyecto)
+            ->first();
+        
+
 
             //$presupuesto = Presupuesto::all();
             // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
@@ -113,7 +121,7 @@ class ProyectoController extends Controller
 
             $proyectos = Proyecto::with(['usuario', 'presupuestos'])
                 ->select('proyectos.*')
-                ->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
+                ->withSum("presupuestos as total_presupuesto", "subtotal")
                 ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
                 ->where('proyectos.estado', 'A')
                 ->groupBy(
