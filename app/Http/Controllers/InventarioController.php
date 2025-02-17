@@ -73,8 +73,8 @@ class InventarioController extends Controller
         $validator = Validator::make($request->all(), [
             "costo" => "required",
             "cantidad" => "required",
-            "nit_proveedor" => "sometimes",
-            "nombre_proveedor" => "sometimes",
+            "nit_proveedor" => "required",
+            "nombre_proveedor" => "required",
         ]);
 
         if ($validator->fails()) {
@@ -83,7 +83,7 @@ class InventarioController extends Controller
 
         try {
 
-            $inventario = Inventario::find($id)->first();
+            $inventario = Inventario::find($id);
 
             if (!$inventario) {
                 return ResponseHelper::error(404, "No se ha encontrado");
