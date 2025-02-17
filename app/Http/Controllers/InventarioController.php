@@ -123,4 +123,33 @@ class InventarioController extends Controller
             return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
         }
     }
+
+    public function destroy(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            "id" => "required|exists:inventarios,id"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+        try {
+            $inventario = Inventario::find($request->id);
+            if (!$inventario) {
+                return ResponseHelper::error(404, "No se ha encontrado");
+            }
+
+            $inventario->estado = "I";
+            $inventario->save();
+            return ResponseHelper::success(
+                200,
+                "Se ha eliminado con exito",
+                ["inventario" => $inventario]
+            );
+        } catch (\Throwable $th) {
+            Log::error("Error al eliminar un inventario " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor ", ["error" => $th->getMessage()]);
+        }
+    }
 }
