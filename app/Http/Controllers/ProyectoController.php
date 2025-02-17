@@ -15,14 +15,15 @@ use Throwable;
 class ProyectoController extends Controller
 {
 
-    public function showWithPresupuesto($codigo_proyecto){
+    public function showWithPresupuesto($codigo_proyecto)
+    {
         try {
             $proyecto = Proyecto::with(['inmuebles.presupuestos', 'inmuebles.tipo_inmueble'])
-            ->where("codigo_proyecto",$codigo_proyecto)
-            ->first();
+                ->where("codigo_proyecto", $codigo_proyecto)
+                ->first();
 
             //$presupuesto = Presupuesto::all();
-           // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
+            // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
             //return $presupuesto;
 
 
@@ -43,18 +44,19 @@ class ProyectoController extends Controller
         }
     }
 
-    public function showWithAsignacion($codigo_proyecto){
+    public function showWithAsignacion($codigo_proyecto)
+    {
         try {
-            $proyecto = Proyecto::with(["inmuebles"=> function ($query) {
+            $proyecto = Proyecto::with(["inmuebles" => function ($query) {
                 $query->where("estado", "A");
-            },'inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
-            ->where("codigo_proyecto",$codigo_proyecto)
-        
-            ->first();
+            }, 'inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
+                ->where("codigo_proyecto", $codigo_proyecto)
+
+                ->first();
 
             //$presupuesto = Presupuesto::all();
-           // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
-           // return $proyecto;
+            // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
+            // return $proyecto;
 
             //ME FALTA MOSTRAR SOLO LOS INMUEBLES ACTIVOS
             if (!$proyecto) {
@@ -82,29 +84,51 @@ class ProyectoController extends Controller
             //     "Se ha obtenido todos los proyectos",
             //     ["proyectos" => $proyectos]
             // );
-            $proyectos = DB::table('proyectos')
-            ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
-            ->select(
-                "proyectos.id",
-                "proyectos.codigo_proyecto",
-                "proyectos.departamento_proyecto",
-                "proyectos.ciudad_municipio_proyecto",
-                "proyectos.direccion_proyecto",
-                "proyectos.user_id",
-                "fecha_inicio_proyecto",
-                "fecha_final_proyecto",
-                "proyectos.estado",
-                DB::raw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto') // Si no hay presupuesto, devuelve 0
-            )
-            ->groupBy(
-                'proyectos.codigo_proyecto',
-                'proyectos.departamento_proyecto',
-                'proyectos.ciudad_municipio_proyecto',
-                'proyectos.direccion_proyecto',
-                'proyectos.user_id',
-                'proyectos.estado'
-            )
-            ->where("estado", "A")->paginate(2);
+            // $proyectos = DB::table('proyectos')
+            // ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
+            // ->leftJoin('users', 'proyectos.user_id', '=', 'users.id')
+            // ->select(
+            //     "proyectos.id",
+            //     "proyectos.codigo_proyecto",
+            //     "proyectos.departamento_proyecto",
+            //     "proyectos.ciudad_municipio_proyecto",
+            //     "proyectos.direccion_proyecto",
+            //     "proyectos.user_id",
+            //     "fecha_inicio_proyecto",
+            //     "fecha_final_proyecto",
+            //     "proyectos.estado",
+            //     "users.nombre_completo as usuario",
+            //     DB::raw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto') // Si no hay presupuesto, devuelve 0
+            // )
+            // ->groupBy(
+            //     'proyectos.codigo_proyecto',
+            //     'proyectos.departamento_proyecto',
+            //     'proyectos.ciudad_municipio_proyecto',
+            //     'proyectos.direccion_proyecto',
+            //     'proyectos.user_id',
+            //     'proyectos.estado',
+            //     "users.nombre_completo"
+            // )
+            // ->where("proyectos.estado", "A")->paginate(2);
+
+            $proyectos = Proyecto::with(['usuario', 'presupuestos'])
+                ->select('proyectos.*')
+                ->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
+                ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
+                ->where('proyectos.estado', 'A')
+                ->groupBy(
+                    'proyectos.id',
+                    'proyectos.codigo_proyecto',
+                    'proyectos.departamento_proyecto',
+                    'proyectos.ciudad_municipio_proyecto',
+                    'proyectos.direccion_proyecto',
+                    'proyectos.user_id',
+                    'proyectos.fecha_inicio_proyecto',
+                    'proyectos.fecha_final_proyecto',
+                    'proyectos.estado'
+                )
+                ->paginate(2);
+
             return ResponseHelper::success(200, "Listado de proyectos", ["proyectos" => $proyectos]);
         } catch (Throwable $th) {
             Log::error("Error al obtener todos los proyectos " . $th->getMessage());
@@ -250,6 +274,4 @@ class ProyectoController extends Controller
             );
         }
     }
-
-    
 }
