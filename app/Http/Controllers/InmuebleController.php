@@ -33,7 +33,7 @@ class InmuebleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
-            "tipo_inmueble_id" => "required|exists:tipo_inmuebles,id",
+            "tipo_inmueble_id" => "required",
             "cantidad_inmueble" => "required|integer"
         ]);
 
