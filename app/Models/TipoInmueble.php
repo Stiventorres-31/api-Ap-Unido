@@ -14,7 +14,7 @@ class TipoInmueble extends Model
         'estado',
     ];
 
-    public function usuarios(){
+    public function usuario(){
         return $this->belongsTo(User::class);
     }
     public function inmuebles(){
