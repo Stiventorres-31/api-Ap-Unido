@@ -118,7 +118,7 @@ class ProyectoController extends Controller
         try {
             $proyecto = Proyecto::with([
                 'inmuebles' => function ($query) {
-                    $query->with('tipo_inmueble')
+                    $query->with(['tipo_inmueble'])
                         ->where("estado", "A")
                         ->withSum('asignaciones as total_asignacion', 'subtotal');
                 },

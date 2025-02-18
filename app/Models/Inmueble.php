@@ -30,4 +30,5 @@ class Inmueble extends Model
     public function asignaciones(){
         return $this->hasMany(Asignacione::class);
     }
+    
 }

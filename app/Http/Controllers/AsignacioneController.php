@@ -24,7 +24,7 @@ class AsignacioneController extends Controller
 
         $validatedData = Validator::make($request->all(), [
             "inmueble_id" => 'required|numeric|exists:inmuebles,id',
-            "codigo_proyecto" => "required|numeric|exists:proyectos,codigo_proyecto",
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
             "materiales" => "required|array",
         ]);
 
@@ -138,7 +138,7 @@ class AsignacioneController extends Controller
                 
                 Asignacione::create([
                     "inmueble_id" => $request->inmueble_id,
-                    "proyecto_id" => $proyecto->proyecto_id,
+                    "proyecto_id" => $proyecto->id,
                     "materiale_id" => $materialAsignar->id,
                     "costo_material" => $inventario->costo,
                     "consecutivo" => $inventario->consecutivo,

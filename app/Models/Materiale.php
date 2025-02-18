@@ -26,5 +26,7 @@ class Materiale extends Model
     public function presupuestos(){
         return $this->hasMany(Presupuesto::class);
     }
+
+ 
     
 }

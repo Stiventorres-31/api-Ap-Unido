@@ -75,7 +75,7 @@ class InmuebleController extends Controller
     {
         try {
             $inmueble = Inmueble::where("estado", "A")
-                ->with(["tipo_inmueble", "usuario", "proyecto", "presupuestos.materiale", "asignaciones"])
+                ->with(["tipo_inmueble", "usuario", "proyecto", "presupuestos.materiale", "asignaciones.materiale"])
                 ->withSum("presupuestos as total_presupuesto", "subtotal")
                 //->selectRaw('COALESCE(SUM(presupuestos.subtotal), 0) as total_presupuesto')
                 ->find($id);
