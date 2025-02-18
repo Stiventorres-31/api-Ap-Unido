@@ -18,7 +18,8 @@ use Throwable;
 class ProyectoController extends Controller
 {
 
-    public function generarReporte($codigo_proyecto){
+    public function generarReporte($codigo_proyecto)
+    {
         $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
             "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
         ]);
@@ -28,11 +29,11 @@ class ProyectoController extends Controller
         }
 
         try {
-            $proyecto = Proyecto::with(["presupuestos.materiale.inventarios","presupuestos.inmueble.tipo_inmueble"])
-            ->where("codigo_proyecto",$codigo_proyecto)->first();
+            $proyecto = Proyecto::with(["presupuestos.materiale.inventarios", "presupuestos.inmueble.tipo_inmueble"])
+                ->where("codigo_proyecto", $codigo_proyecto)->first();
 
             return $proyecto;
-//ME FALTA ESTE REPORTE DE PRESUPUESTO
+            //ME FALTA ESTE REPORTE DE PRESUPUESTO
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
@@ -59,13 +60,12 @@ class ProyectoController extends Controller
             $response = new StreamedResponse(function () use ($archivoCSV) {
                 echo $archivoCSV->toString();
             });
-            
+
             // Establece las cabeceras adecuadas
             $response->headers->set('Content-Type', 'text/csv');
             $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
-            
+
             return $response;
-         
         } catch (Throwable $th) {
             Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
             return ResponseHelper::error(
@@ -80,14 +80,15 @@ class ProyectoController extends Controller
         try {
             $proyecto = Proyecto::with([
                 'inmuebles' => function ($query) {
-                    $query->with('tipo_inmueble')->where("estado","A")
-                          ->withSum('presupuestos as total_presupuesto', 'subtotal');
+                    $query->with('tipo_inmueble')
+                        ->where("estado", "A")
+                        ->withSum('presupuestos as total_presupuesto', 'subtotal');
                 },
                 'inmuebles.presupuestos'
             ])
-            ->where('codigo_proyecto', $codigo_proyecto)
-            ->first();
-        
+                ->where('codigo_proyecto', $codigo_proyecto)
+                ->first();
+
 
 
             //$presupuesto = Presupuesto::all();
@@ -118,12 +119,13 @@ class ProyectoController extends Controller
             $proyecto = Proyecto::with([
                 'inmuebles' => function ($query) {
                     $query->with('tipo_inmueble')
-                          ->withSum('asignaciones as total_asignacion', 'subtotal');
+                        ->where("estado", "A")
+                        ->withSum('asignaciones as total_asignacion', 'subtotal');
                 },
                 'inmuebles.asignaciones'
             ])
-            ->where('codigo_proyecto', $codigo_proyecto)
-            ->first();
+                ->where('codigo_proyecto', $codigo_proyecto)
+                ->first();
 
             //$presupuesto = Presupuesto::all();
             // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
@@ -331,7 +333,7 @@ class ProyectoController extends Controller
             if (!$proyecto) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
-//SE FALTA VALIDAR SI TIENE ASIGNACIONES Y/O PRESUPUESTO ASIGNADO
+            //SE FALTA VALIDAR SI TIENE ASIGNACIONES Y/O PRESUPUESTO ASIGNADO
             $proyecto->estado = "I";
             $proyecto->save();
 
