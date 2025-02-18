@@ -29,7 +29,7 @@ class UserController extends Controller
             "nombre_completo" => "required|string",
             'password' => "required",
             'rol_usuario' => "required|array",
-            'rol_usuario.name' => "required|string|in:ADMIN,CONSULTOR,SUPER ADMIN"
+            'rol_usuario.name' => "required|string|in:ADMINISTRADOR,CONSULTOR,OPERARIO"
         ]);
 
         if ($validator->fails()) {
