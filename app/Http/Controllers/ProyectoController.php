@@ -115,12 +115,15 @@ class ProyectoController extends Controller
     public function showWithAsignacion($codigo_proyecto)
     {
         try {
-            $proyecto = Proyecto::with(["inmuebles" => function ($query) {
-                $query->where("estado", "A");
-            }, 'inmuebles.asignaciones', 'inmuebles.tipo_inmueble'])
-                ->where("codigo_proyecto", $codigo_proyecto)
-
-                ->first();
+            $proyecto = Proyecto::with([
+                'inmuebles' => function ($query) {
+                    $query->with('tipo_inmueble')
+                          ->withSum('asignaciones as total_asignacion', 'subtotal');
+                },
+                'inmuebles.asignaciones'
+            ])
+            ->where('codigo_proyecto', $codigo_proyecto)
+            ->first();
 
             //$presupuesto = Presupuesto::all();
             // $presupuesto = Inmueble::where("codigo_proyecto", $codigo_proyecto)->first();
