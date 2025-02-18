@@ -121,10 +121,16 @@ class InmuebleController extends Controller
             $asignaciones = Asignacione::where("inmueble_id", $request->id)->exists();
 
            
-            if ($presupuestos || $asignaciones) {
+            if ($asignaciones) {
                 return ResponseHelper::error(
                     400,
-                    "No se puede eliminar este inmueble porque tiene información relacionada"
+                    "No se puede eliminar este inmueble porque tiene una asignacion"
+                );
+            }
+            if ($presupuestos) {
+                return ResponseHelper::error(
+                    400,
+                    "No se puede eliminar este inmueble porque tiene un presupuesto"
                 );
             }
 
