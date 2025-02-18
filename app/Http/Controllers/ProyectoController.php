@@ -323,20 +323,20 @@ class ProyectoController extends Controller
         }
     }
 
-    public function destroy($codigo_proyecto)
+    public function destroy(Request $request)
     {
         try {
-            $proyecto = Proyecto::where("codigo_proyecto", $codigo_proyecto)->first();
+            $proyecto = Proyecto::where("codigo_proyecto", $request->codigo_proyecto)->first();
 
             if (!$proyecto) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
-
+//SE FALTA VALIDAR SI TIENE ASIGNACIONES Y/O PRESUPUESTO ASIGNADO
             $proyecto->estado = "I";
             $proyecto->save();
 
             return ResponseHelper::success(200, "Se ha eliminado con exito");
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error("Error al eliminar un proyecto " . $th->getMessage());
             return ResponseHelper::error(
                 500,
