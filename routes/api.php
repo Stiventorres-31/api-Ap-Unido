@@ -90,7 +90,7 @@ Route::middleware("auth:api")->group(function(){
         Route::post("/", [AsignacioneController::class, "store"]);
         Route::post("/file", [AsignacioneController::class, "fileMasivo"]);
         // Route::put("/{id}", [PresupuestoController::class, "edit"]);
-        // Route::delete("/", [PresupuestoController::class, 'destroy']);
+        Route::delete("/", [AsignacioneController::class, 'destroy']);
     });
 });
 // Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId("proyecto_id")->references("id")->on("proyectos");
             $table->foreignId("user_id")->references("id")->on("users");
             $table->unique(["inmueble_id","proyecto_id","materiale_id"],"llave_unicas");
+            $table->enum("estado",['A','I'])->default("A"); //Activo e Inactivo
             $table->timestamps();
         });
     }

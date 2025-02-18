@@ -254,8 +254,9 @@ class PresupuestoController extends Controller
             $presupuesto = Presupuesto::find($request->id);
             $presupuesto->costo_material = $request->costo_material;
             $presupuesto->cantidad_material = $request->cantidad_material;
+            $presupuesto->subtotal = $request->cantidad_material * $request->costo_material;
             $presupuesto->save();
-            return ResponseHelper::success(200, "Se ha eliminado con exito");
+            return ResponseHelper::success(200, "Se ha actualizado con exito");
         } catch (Throwable $th) {
             DB::rollBack();
             Log::error("Error al editar un presupuesto " . $th->getMessage());
