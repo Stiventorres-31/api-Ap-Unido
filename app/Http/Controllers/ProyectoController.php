@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\Asignacione;
 use App\Models\Inmueble;
 use App\Models\Presupuesto;
 use App\Models\Proyecto;
@@ -328,12 +329,34 @@ class ProyectoController extends Controller
     public function destroy(Request $request)
     {
         try {
-            $proyecto = Proyecto::where("codigo_proyecto", $request->codigo_proyecto)->first();
+            $proyecto = Proyecto::where("codigo_proyecto", $request->codigo_proyecto)
+                ->where("estado", "A")
+                ->first();
 
             if (!$proyecto) {
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
             //SE FALTA VALIDAR SI TIENE ASIGNACIONES Y/O PRESUPUESTO ASIGNADO
+
+            $proyecto = Proyecto::where("codigo_proyecto",$request->codigo_proyecto)
+            ->where("estado","A")
+            ->first();
+            $presupuestos = Presupuesto::where("proyecto_id", $proyecto->id)->exists();
+            $asignaciones = Asignacione::where("proyecto_id", $proyecto->id)->exists();
+
+
+            if ($asignaciones) {
+                return ResponseHelper::error(
+                    400,
+                    "No se puede eliminar este proyecto porque tiene una asignacion"
+                );
+            }
+            if ($presupuestos) {
+                return ResponseHelper::error(
+                    400,
+                    "No se puede eliminar este proyecto porque tiene un presupuesto"
+                );
+            }
             $proyecto->estado = "I";
             $proyecto->save();
 
