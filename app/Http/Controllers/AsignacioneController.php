@@ -133,7 +133,8 @@ class AsignacioneController extends Controller
                 // return $inventario;
                 //$inventario->decrement("cantidad", 4);
 
-
+                $inventario->cantidad -= $material["cantidad_material"];
+                $inventario->save();
                 
                 Asignacione::create([
                     "inmueble_id" => $request->inmueble_id,
