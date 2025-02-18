@@ -157,10 +157,8 @@ class InmuebleController extends Controller
         }
 
         try {
-            $inmueble = Inmueble::with(["proyecto","tipo_inmueble","presupuestos.materiale.inventarios"])->find($id);
-
-           
-
+            $inmueble = Inmueble::with(["proyecto","tipo_inmueble","presupuestos.materiale.inventarios"])
+            ->find($id);
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
@@ -170,8 +168,8 @@ class InmuebleController extends Controller
                 // "inmueble_id",
                 "referencia_material",
                 "mombre_material",
-                "costo del material",
-                "Cantidad del material"
+                "costo_material",
+                "Cantidad_material"
             ]);
 
             foreach ($inmueble->presupuestos as $presupuesto) {
@@ -193,19 +191,9 @@ class InmuebleController extends Controller
             $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
             
             return $response;
-            // $headers = [
-            //     'Content-Type' => 'text/csv',
-            //     'Content-Disposition' => 'attachment; filename="reporte_tipo_inmuebles.csv"',
-            // ];
-
-            $csvContent = (string) $archivoCSV;
-            $filePath = 'reports/reporte_presupuesto.csv';
-            Storage::put($filePath, $csvContent);
-            return response()->download(storage_path("app/{$filePath}"))->deleteFileAfterSend(true);
-
-            //return ResponseHelper::success(201, "Se ha generado con exito", ["inmueble" => $filePath]);
+         
         } catch (Throwable $th) {
-            Log::error("error al generar el reporte " . $th->getMessage());
+            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",

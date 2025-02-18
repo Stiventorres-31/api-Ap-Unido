@@ -62,8 +62,9 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/presupuesto/{codigo_proyecto}", [ProyectoController::class, "showWithPresupuesto"]);
         Route::get("/asignacion/{codigo_proyecto}", [ProyectoController::class, "showWithAsignacion"]);
         Route::delete("/", [ProyectoController::class, 'destroy']);
+        Route::get("/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);
     });
-
+    
     Route::prefix('inmueble')->group(function () {
         Route::get("/", [InmuebleController::class, "index"]);
         Route::get("/{id}", [InmuebleController::class, "show"]);
@@ -71,9 +72,9 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/report/{id}", [InmuebleController::class, "generarReporte"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
         Route::delete("/", [InmuebleController::class, 'destroy']);
-
+        
     });
-
+    
     Route::prefix('presupuesto')->group(function () {
         // Route::get("/", [PresupuestoController::class, "index"]);
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
@@ -92,4 +93,5 @@ Route::middleware("auth:api")->group(function(){
         // Route::delete("/", [PresupuestoController::class, 'destroy']);
     });
 });
+// Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\Inmueble;
 use App\Models\Presupuesto;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;
@@ -10,11 +11,70 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use League\Csv\Writer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ProyectoController extends Controller
 {
 
+    public function generarReporte($codigo_proyecto){
+        $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $proyecto = Proyecto::with(["presupuestos.materiale.inventarios","presupuestos.inmueble.tipo_inmueble"])
+            ->where("codigo_proyecto",$codigo_proyecto)->first();
+
+            return $proyecto;
+
+            $archivoCSV = Writer::createFromString('');
+            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+            $archivoCSV->insertOne([
+                "inmueble_id",
+                // "inmueble_id",
+                "referencia_material",
+                "mombre_material",
+                "costo_material",
+                "Cantidad_material",
+                "subtotal"
+            ]);
+
+            foreach ($inmueble->presupuestos as $presupuesto) {
+                $archivoCSV->insertOne([
+                    $inmueble->proyecto->codigo_proyecto,
+                    // $presupuesto["inmueble_id"],
+                    $presupuesto["materiale"]["referencia_material"],
+                    $presupuesto["materiale"]["nombre_material"],
+                    $presupuesto["costo_material"],
+                    $presupuesto["cantidad_material"],
+                ]);
+            }
+            $response = new StreamedResponse(function () use ($archivoCSV) {
+                echo $archivoCSV->toString();
+            });
+            
+            // Establece las cabeceras adecuadas
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
+            
+            return $response;
+         
+        } catch (Throwable $th) {
+            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
+            return ResponseHelper::error(
+                500,
+                "Error interno en el servidor",
+                ["error" => $th->getMessage()]
+            );
+        }
+    }
     public function showWithPresupuesto($codigo_proyecto)
     {
         try {
