@@ -70,6 +70,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/{id}", [InmuebleController::class, "show"]);
         Route::post("/", [InmuebleController::class, "store"]);
         Route::get("/report/{id}", [InmuebleController::class, "generarReporte"]);
+        Route::get("/report/asignacion/{id}", [InmuebleController::class, "generarReporte"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
         Route::delete("/", [InmuebleController::class, 'destroy']);
         
@@ -93,5 +94,6 @@ Route::middleware("auth:api")->group(function(){
         Route::delete("/", [AsignacioneController::class, 'destroy']);
     });
 });
+//Route::get("inmuebles/report/{id}", [InmuebleController::class, "generarReporte"]);
 // Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);
 
