@@ -278,8 +278,9 @@ class PresupuestoController extends Controller
 
         try {
             $presupuesto = Presupuesto::find($request->id);
-            $presupuesto->estado = "I";
-            $presupuesto->save();
+            // $presupuesto->estado = "I";
+            // $presupuesto->save();
+            $presupuesto->delete();
             return ResponseHelper::success(200, "Se ha eliminado con exito");
         } catch (Throwable $th) {
             DB::rollBack();
