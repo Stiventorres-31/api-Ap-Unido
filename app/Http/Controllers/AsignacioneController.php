@@ -363,13 +363,14 @@ class AsignacioneController extends Controller
 
         try {
             $asignacione = Asignacione::find($request->id);
+            $inventario =Inventario::where("materiale_id",$asignacione->materiale_id)
+            ->where("consecutivo",$asignacione->consecutivo)
+            ->first();
 
+            $inventario->cantidad += $asignacione->cantidad_material;
+            $inventario->save();
             
-            $asignacione->estado = "I";
-            $asignacione->save();
-
-// ME FALTA QUE SE DESCUENTE LA CANTIDAD EN EL INVENTARIO
-
+            $asignacione->delete();
 
             return ResponseHelper::success(200, "Se ha eliminado con exito");
         } catch (Throwable $th) {

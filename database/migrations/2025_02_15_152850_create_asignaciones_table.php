@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId("materiale_id")->references("id")->on("materiales");
             $table->foreignId("proyecto_id")->references("id")->on("proyectos");
             $table->foreignId("user_id")->references("id")->on( "users");
-            $table->enum("estado",['A','I'])->default("A"); //Activo e Inactivo
+            // $table->enum("estado",['A','I'])->default("A"); //Activo e Inactivo
             $table->unique(["inmueble_id","materiale_id","consecutivo"],"llave_unida");
             $table->timestamps();
         });

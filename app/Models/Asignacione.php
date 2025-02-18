@@ -14,8 +14,7 @@ class Asignacione extends Model
         'user_id',
         'cantidad_material',
         'costo_material',
-        'subtotal',
-        'estado'
+        'subtotal'
     ];
 
     public function usuario(){

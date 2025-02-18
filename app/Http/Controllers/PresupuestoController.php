@@ -156,22 +156,32 @@ class PresupuestoController extends Controller
                     DB::rollBack();
                     return ResponseHelper::error(422, $validatorDataCSV->errors()->first(), $validatorDataCSV->errors());
                 }
+                $materiale = Materiale::where("referencia_material", strtoupper(trim($valueCSV["referencia_material"])))
+                    ->where("estado", "A")
+                    ->first();
 
-                // $existencia_presupuesto = Presupuesto::where("inmueble_id", $valueCSV["inmueble_id"])
-                //     ->where("codigo_proyecto", $request->codigo_proyecto)
-                //     ->where("referencia_material", $valueCSV["referencia_material"])->exists();
+                if (!$materiale) {
+                    DB::rollBack();
+                    return ResponseHelper::error(
+                        400,
+                        "El material '{$valueCSV['referencia_material']}' no existe"
+                    );
+                }
 
-                // if ($existencia_presupuesto) {
-                //     DB::rollBack();
-                //     return ResponseHelper::error(
-                //         400,
-                //         "El presupuesto del inmueble '{$valueCSV['inmueble_id']}' con el material '{$valueCSV['referencia_material']}' ya existe en el proyecto '{$request->codigo_proyecto}'"
-                //     );
-                // }
+                $existencia_presupuesto = Presupuesto::where("inmueble_id", $valueCSV["inmueble_id"])
+                    ->where("materiale_id", $materiale->id)->exists();
+
+                if ($existencia_presupuesto) {
+                    DB::rollBack();
+                    return ResponseHelper::error(
+                        400,
+                        "El presupuesto del inmueble '{$valueCSV['inmueble_id']}' con el material '{$valueCSV['referencia_material']}' ya existe en el proyecto '{$request->codigo_proyecto}'"
+                    );
+                }
                 $inmueble = Inmueble::find(trim($valueCSV["inmueble_id"]))
                     ->where("estado", "A")
                     ->first();
-                
+
 
                 if (!$inmueble) {
                     DB::rollBack();
@@ -200,17 +210,7 @@ class PresupuestoController extends Controller
                     );
                 }
 
-                $materiale = Materiale::where("referencia_material", strtoupper(trim($valueCSV["referencia_material"])))
-                    ->where("estado", "A")
-                    ->first();
 
-                if (!$materiale) {
-                    DB::rollBack();
-                    return ResponseHelper::error(
-                        400,
-                        "El material '{$valueCSV['referencia_material']}' no existe"
-                    );
-                }
 
 
                 Presupuesto::create(

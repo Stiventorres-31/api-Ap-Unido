@@ -13,8 +13,7 @@ class Presupuesto extends Model
         'cantidad_material',
         'proyecto_id',
         'user_id',
-        'subtotal',
-        'estado'
+        'subtotal'
     ];
 
     public function usuario(){
