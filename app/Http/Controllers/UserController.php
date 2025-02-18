@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::where("estado", "A")->get();
+            $users = User::where("estado", "A")->where("rol_usuario","<>","SUPER ADMIN")->get();
             return ResponseHelper::success(200, "Todos los usuarios", ["usuarios" => $users]);
         } catch (\Throwable $th) {
             Log::error("error al obtener todos los usuarios " . $th->getMessage());
