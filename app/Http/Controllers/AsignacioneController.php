@@ -306,4 +306,8 @@ class AsignacioneController extends Controller
             return ResponseHelper::error(500, "Error interno en el servidor");
         }
     }
+
+    public function get(){
+        
+    }
 }

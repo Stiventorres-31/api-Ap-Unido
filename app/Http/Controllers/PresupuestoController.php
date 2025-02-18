@@ -236,4 +236,53 @@ class PresupuestoController extends Controller
             return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
         }
     }
+
+    public function edit(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            "id" => "required|exists:presupuestos,id",
+            "costo_material" => "required",
+            "cantidad_material" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $presupuesto = Presupuesto::find($request->id);
+            $presupuesto->costo_material = $request->costo_material;
+            $presupuesto->cantidad_material = $request->cantidad_material;
+            $presupuesto->save();
+            return ResponseHelper::success(200, "Se ha eliminado con exito");
+        } catch (Throwable $th) {
+            DB::rollBack();
+            Log::error("Error al editar un presupuesto " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            "id" => "required|exists:presupuestos,id"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $presupuesto = Presupuesto::find($request->id);
+            $presupuesto->estado = "I";
+            $presupuesto->save();
+            return ResponseHelper::success(200, "Se ha eliminado con exito");
+        } catch (Throwable $th) {
+            DB::rollBack();
+            Log::error("Error al eliminar una presupuesto " . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
+        }
+    }
 }

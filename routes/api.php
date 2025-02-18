@@ -80,8 +80,8 @@ Route::middleware("auth:api")->group(function(){
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
         Route::post("/", [PresupuestoController::class, "store"]);
         Route::post("/file", [PresupuestoController::class, "fileMasivo"]);
-        // Route::put("/{id}", [PresupuestoController::class, "edit"]);
-        // Route::delete("/", [PresupuestoController::class, 'destroy']);
+        Route::put("/", [PresupuestoController::class, "edit"]);
+        Route::delete("/", [PresupuestoController::class, 'destroy']);
     });
 
     Route::prefix('asignacion')->group(function () {
