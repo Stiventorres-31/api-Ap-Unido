@@ -72,7 +72,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             "nombre_completo" => "required|string",
             "rol_usuario" => "required|array",
-            "rol_usuario.name" => "required|in:ADMIN,CONSULTOR,SUPER ADMIN"
+            "rol_usuario.name" => "required|in:ADMINISTRADOR,CONSULTOR,OPERARIO"
         ]);
 
         if ($validator->fails()) {

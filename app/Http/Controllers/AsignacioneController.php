@@ -363,11 +363,11 @@ class AsignacioneController extends Controller
         try {
             $asignacione = Asignacione::find($request->id);
 
-            return $asignacione;
+            
             $asignacione->estado = "I";
             $asignacione->save();
 
-
+// ME FALTA QUE SE DESCUENTE LA CANTIDAD EN EL INVENTARIO
 
 
             return ResponseHelper::success(200, "Se ha eliminado con exito");
