@@ -185,11 +185,17 @@ class ProyectoController extends Controller
             // )
             // ->where("proyectos.estado", "A")->paginate(2);
 
-            $proyectos = Proyecto::with(['usuario', 'presupuestos'])
+            $proyectos = Proyecto::with(['usuario', 'presupuestos','asignaciones'])
                 ->select('proyectos.*')
+
                 ->withSum("presupuestos as total_presupuesto", "subtotal")
                 ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
+                
+                ->withSum("asignaciones as total_asignacion", "subtotal")
+                ->leftJoin('asignaciones', 'proyectos.id', '=', 'asignaciones.proyecto_id')
+                
                 ->where('proyectos.estado', 'A')
+                
                 ->groupBy(
                     'proyectos.id',
                     'proyectos.codigo_proyecto',
