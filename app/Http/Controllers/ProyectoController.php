@@ -80,7 +80,7 @@ class ProyectoController extends Controller
         try {
             $proyecto = Proyecto::with([
                 'inmuebles' => function ($query) {
-                    $query->with('tipo_inmueble')
+                    $query->with('tipo_inmueble')->where("estado","A")
                           ->withSum('presupuestos as total_presupuesto', 'subtotal');
                 },
                 'inmuebles.presupuestos'
@@ -268,7 +268,7 @@ class ProyectoController extends Controller
                 return ResponseHelper::error(404, "No existe el proyecto");
             }
             return ResponseHelper::success(200, "Se ha encontrado", ["proyecto" => $proyecto]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error("Error al consultar un proyecto " . $th->getMessage());
             return ResponseHelper::error(
                 500,

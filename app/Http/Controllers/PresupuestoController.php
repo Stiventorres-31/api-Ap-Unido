@@ -171,6 +171,7 @@ class PresupuestoController extends Controller
                 $inmueble = Inmueble::find(trim($valueCSV["inmueble_id"]))
                     ->where("estado", "A")
                     ->first();
+                
 
                 if (!$inmueble) {
                     DB::rollBack();

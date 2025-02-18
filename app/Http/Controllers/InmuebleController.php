@@ -89,7 +89,7 @@ class InmuebleController extends Controller
                 "Se ha encontrado",
                 ["inmueble" => $inmueble]
             );
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error("Error al consultar un inmueble " . $th->getMessage());
             return ResponseHelper::error(
                 500,
