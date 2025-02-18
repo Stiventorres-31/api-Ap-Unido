@@ -95,9 +95,9 @@ class UserController extends Controller
         }
     }
 
-    public function destroy($numero_identificacion)
+    public function destroy(Request $request)
     {
-        $validator = Validator::make(["numero_identificacion" => $numero_identificacion], [
+        $validator = Validator::make($request->all(), [
             "numero_identificacion" => "required|exists:users,numero_identificacion"
         ]);
 
@@ -106,7 +106,7 @@ class UserController extends Controller
         }
 
         try {
-            $user = User::where("numero_identificacion", $numero_identificacion)->first();
+            $user = User::where("numero_identificacion", $request->numero_identificacion)->first();
             $user->estado = "I";
             $user->save();
             return ResponseHelper::success(200, "Se ha eliminado con exito");
