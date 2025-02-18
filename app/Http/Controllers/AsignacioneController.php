@@ -53,8 +53,8 @@ class AsignacioneController extends Controller
                     return ResponseHelper::error(422, $validatedData->errors()->first(), $validatedData->errors());
                 }
                 $proyecto = Proyecto::where("codigo_proyecto", $request->codigo_proyecto)
-                ->where("estado","A")
-                ->first();
+                    ->where("estado", "A")
+                    ->first();
 
                 if (!$proyecto) {
                     DB::rollBack();
@@ -78,8 +78,8 @@ class AsignacioneController extends Controller
 
                 $existenciaAsingacion = Asignacione::where("materiale_id", $materialAsignar->id)
                     ->where("consecutivo", $material["consecutivo"])
+                    ->where("proyecto_id", $proyecto->id)
                     ->exists();
-
 
                 if ($existenciaAsingacion) {
                     DB::rollBack();
@@ -89,10 +89,24 @@ class AsignacioneController extends Controller
                     );
                 }
 
+                $existenciaPresupuesto = Presupuesto::where("materiale_id", $materialAsignar->id)
+                    ->where("inmueble_id", $request->inmueble_id)
+                    ->where("proyecto_id", $proyecto->id)
+                    ->first();
+
+                if (!$existenciaPresupuesto) {
+                    DB::rollBack();
+                    return ResponseHelper::error(
+                        500,
+                        "No existe presupuesto del material '{$material["referencia_material"]}'"
+                    );
+                }
+
+
 
                 //VALIDAR EXISTENCIA ENTRE EL MATERIAL Y EL PRESUPUESTO DEL PROYECTO
                 $datosPresupuesto = Presupuesto::where("materiale_id", $materialAsignar->id)
-                    ->where("inmueble_id", strtoupper(trim($request->inmueble_id)))->first();
+                    ->where("inmueble_id", $request->inmueble_id)->first();
 
 
                 if (!$datosPresupuesto) {
@@ -135,7 +149,7 @@ class AsignacioneController extends Controller
 
                 $inventario->cantidad -= $material["cantidad_material"];
                 $inventario->save();
-                
+
                 Asignacione::create([
                     "inmueble_id" => $request->inmueble_id,
                     "proyecto_id" => $proyecto->id,
@@ -363,13 +377,13 @@ class AsignacioneController extends Controller
 
         try {
             $asignacione = Asignacione::find($request->id);
-            $inventario =Inventario::where("materiale_id",$asignacione->materiale_id)
-            ->where("consecutivo",$asignacione->consecutivo)
-            ->first();
+            $inventario = Inventario::where("materiale_id", $asignacione->materiale_id)
+                ->where("consecutivo", $asignacione->consecutivo)
+                ->first();
 
             $inventario->cantidad += $asignacione->cantidad_material;
             $inventario->save();
-            
+
             $asignacione->delete();
 
             return ResponseHelper::success(200, "Se ha eliminado con exito");

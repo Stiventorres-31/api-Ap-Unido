@@ -120,7 +120,7 @@ class InmuebleController extends Controller
             $presupuestos = Presupuesto::where("inmueble_id", $request->id)->exists();
             $asignaciones = Asignacione::where("inmueble_id", $request->id)->exists();
 
-           
+
             if ($asignaciones) {
                 return ResponseHelper::error(
                     400,
@@ -163,8 +163,8 @@ class InmuebleController extends Controller
         }
 
         try {
-            $inmueble = Inmueble::with(["proyecto","tipo_inmueble","presupuestos.materiale.inventarios"])
-            ->find($id);
+            $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "presupuestos.materiale.inventarios"])
+                ->find($id);
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
@@ -191,13 +191,77 @@ class InmuebleController extends Controller
             $response = new StreamedResponse(function () use ($archivoCSV) {
                 echo $archivoCSV->toString();
             });
-            
+
             // Establece las cabeceras adecuadas
             $response->headers->set('Content-Type', 'text/csv');
             $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
-            
+
             return $response;
-         
+        } catch (Throwable $th) {
+            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
+            return ResponseHelper::error(
+                500,
+                "Error interno en el servidor",
+                ["error" => $th->getMessage()]
+            );
+        }
+    }
+
+    public function generarReporteAsignacion($id)
+    {
+        $validator = Validator::make(["id" => $id], [
+            "id" => "required|exists:inmuebles,id",
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "asignaciones.materiale"])
+                ->find($id);
+
+
+            if(!$inmueble->asignaciones){
+                return ResponseHelper::error(404,"Este inmueble no tiene asignaciones");
+            }
+                // return $inmueble;
+
+            $archivoCSV = Writer::createFromString('');
+            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+            $archivoCSV->insertOne([
+                "codigo_proyecto",
+                // "inmueble_id",
+                "referencia_material",
+                "mombre_material",
+                "consecutivo",
+                "costo_material",
+                "Cantidad_material",
+                "subtotal"
+            ]);
+
+            foreach ($inmueble->asignaciones as $asignacion) {
+                $archivoCSV->insertOne([
+                    $inmueble->proyecto->codigo_proyecto,
+                    // $presupuesto["inmueble_id"],
+                    $asignacion["materiale"]["referencia_material"],
+                    $asignacion["materiale"]["nombre_material"],
+                    $asignacion["consecutivo"],
+                    $asignacion["costo_material"],
+                    $asignacion["cantidad_material"],
+                    $asignacion["subtotal"],
+                ]);
+            }
+            $response = new StreamedResponse(function () use ($archivoCSV) {
+                echo $archivoCSV->toString();
+            });
+
+            // Establece las cabeceras adecuadas
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
+
+            return $response;
         } catch (Throwable $th) {
             Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
             return ResponseHelper::error(
