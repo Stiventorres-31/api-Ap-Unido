@@ -117,9 +117,10 @@ class InmuebleController extends Controller
                 return ResponseHelper::error(404, "No se ha encontrado");
             }
 
-            $presupuestos = Presupuesto::where("inmueble_id", $request->inmueble_id)->exists();
-            $asignaciones = Asignacione::where("inmueble_id", $request->inmueble_id)->exists();
+            $presupuestos = Presupuesto::where("inmueble_id", $request->id)->exists();
+            $asignaciones = Asignacione::where("inmueble_id", $request->id)->exists();
 
+           
             if ($presupuestos || $asignaciones) {
                 return ResponseHelper::error(
                     400,
@@ -133,8 +134,7 @@ class InmuebleController extends Controller
 
             return ResponseHelper::success(
                 200,
-                "Se ha encontrado",
-                ["inmueble" => $inmueble]
+                "Se eliminado con exito"
             );
         } catch (Throwable $th) {
             Log::error("Error al consultar un inmueble " . $th->getMessage());
