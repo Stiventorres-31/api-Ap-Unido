@@ -55,7 +55,8 @@ class ProyectoController extends Controller
                     'proyectos.fecha_inicio_proyecto',
                     'proyectos.fecha_final_proyecto',
                     'proyectos.estado'
-                )->orderByDesc("id")
+                )
+                ->orderByDesc("id")
                 ->paginate(2);
 
             // $proyectos = Proyecto::where("codigo_proyecto", "LIKE",  $codigo_proyecto . "%")
@@ -82,18 +83,21 @@ class ProyectoController extends Controller
             //PROBAR EL withCount('presupuestos');
             $proyecto = Proyecto::with([
                 "presupuestos",
-                // "presupuestos.inmueble.tipo_inmueble",
+                "inmuebles",
                 "asignaciones.materiale.inventarios",
                 "asignaciones.inmueble.tipo_inmueble",
             ])
                 ->where("estado", "A")
                 ->where("codigo_proyecto", $codigo_proyecto)->first();
 
-            $cantidadPresupuestos = $proyecto->presupuestos->count();
-            $cantidadAsignaciones = $proyecto->asignaciones->count();
+            // return $proyecto;
+            $totalPresupuestado = $proyecto->presupuestos->sum("subtotal");
+            $totalAsignado = $proyecto->asignaciones->sum("subtotal");
 
-            $porcentaje_completado = number_format(($cantidadAsignaciones / $cantidadPresupuestos) * 100, 2);
-
+            $porcentaje_completado = round($totalPresupuestado > 0
+                ? ($totalAsignado / $totalPresupuestado) * 100
+                : 0);
+            // return $porcentaje_completado;
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
