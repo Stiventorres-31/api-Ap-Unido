@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::post("/auth/login",AuthController::class);
 
 Route::middleware("auth:api")->group(function(){
-    Route::prefix("usuario")->group(function(){
+
+    Route::middleware("rol")->prefix("usuario")->group(function(){
         Route::put("/changePassword",[UserController::class,"changePassword"]);
         Route::put("/changePasswordAdmin",[UserController::class,"changePasswordAdmin"]);
         Route::post("/",[UserController::class,"store"]);

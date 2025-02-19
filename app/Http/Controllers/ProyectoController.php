@@ -30,6 +30,7 @@ class ProyectoController extends Controller
         }
 
         try {
+            //PROBAR EL withCount('presupuestos');
             $proyecto = Proyecto::with([
                 "presupuestos",
                 // "presupuestos.inmueble.tipo_inmueble",
