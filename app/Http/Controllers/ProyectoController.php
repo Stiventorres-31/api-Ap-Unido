@@ -31,11 +31,38 @@ class ProyectoController extends Controller
 
         try {
             //BUSCAR LOS PROYECTO QUE COMIENCEN CON EL VALOR QUE INGRESE EL USUARIO
-            $proyectos = Proyecto::where("codigo_proyecto", "LIKE",  $codigo_proyecto . "%")
-                ->where("estado", "A")
-                ->get();
 
-            return ResponseHelper::success(200, "Busqueda exitosa", ["proyectos" => $proyectos]);
+            // TENGO QUE MOSTRAR LA INFORMACION PRSUPUESTO Y ASIGNACION
+            $proyecto = Proyecto::with(['usuario'])
+                ->select('proyectos.*')
+
+                ->withSum("presupuestos as total_presupuesto", "subtotal")
+                ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
+
+                ->withSum("asignaciones as total_asignacion", "subtotal")
+                ->leftJoin('asignaciones', 'proyectos.id', '=', 'asignaciones.proyecto_id')
+
+                ->where("codigo_proyecto", "LIKE",  "%" . $codigo_proyecto . "%")
+                ->where('proyectos.estado', 'A')
+
+                ->groupBy(
+                    'proyectos.id',
+                    'proyectos.codigo_proyecto',
+                    'proyectos.departamento_proyecto',
+                    'proyectos.ciudad_municipio_proyecto',
+                    'proyectos.direccion_proyecto',
+                    'proyectos.user_id',
+                    'proyectos.fecha_inicio_proyecto',
+                    'proyectos.fecha_final_proyecto',
+                    'proyectos.estado'
+                )->orderByDesc("id")
+                ->paginate(2);
+
+            // $proyectos = Proyecto::where("codigo_proyecto", "LIKE",  $codigo_proyecto . "%")
+            //     ->where("estado", "A")
+            //     ->get();
+
+            return ResponseHelper::success(200, "Busqueda exitosa", ["proyectos" => $proyecto]);
         } catch (Throwable $th) {
             Log::error("Error al buscar un proyecto por LIKE" . $th->getMessage());
             return ResponseHelper::error(500, "Error interno en el servidor");
