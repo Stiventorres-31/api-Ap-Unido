@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('inventarios', function (Blueprint $table) {
             $table->id();
             $table->bigInteger("consecutivo");
-            $table->decimal("costo");
-            $table->string("cantidad");
+            $table->decimal("costo",20,2);
+            $table->integer("cantidad");
             $table->string("nit_proveedor");
             $table->string("nombre_proveedor");
             //$table->string("descripcion_proveedor")->nullable();

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('asignaciones', function (Blueprint $table) {
             $table->id();
 
-            $table->decimal("costo_material");
-            $table->decimal("subtotal");
-            $table->decimal("cantidad_material");
+            $table->decimal("costo_material",20,2);
+            $table->decimal("subtotal",20,2);
+            $table->integer("cantidad_material");
             $table->bigInteger("consecutivo");
             
             $table->foreignId("inmueble_id")->references("id")->on("inmuebles");

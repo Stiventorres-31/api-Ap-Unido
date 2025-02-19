@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string("nombre_material", 255);
             $table->enum("estado",['A','I'])->default("A"); //Activo e Inactivo
 
-            $table->unique(["referencia_material","nombre_material"]);
+            $table->unique(["referencia_material"]);
             $table->foreignId("user_id")->references("id")->on("users");
             $table->timestamps();
         }); 

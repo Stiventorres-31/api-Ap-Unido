@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('presupuestos', function (Blueprint $table) {
             $table->id();
-            $table->decimal("subtotal");
-            $table->decimal("costo_material");
-            $table->decimal("cantidad_material");
+            $table->decimal("subtotal",20,2);
+            $table->decimal("costo_material",20,2);
+            $table->integer("cantidad_material");
             $table->foreignId("materiale_id")->references("id")->on("materiales");
             $table->foreignId("inmueble_id")->references("id")->on("inmuebles");
             $table->foreignId("proyecto_id")->references("id")->on("proyectos");

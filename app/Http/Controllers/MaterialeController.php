@@ -33,7 +33,7 @@ class MaterialeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "referencia_material" => "required|unique:materiales,referencia_material",
-            "nombre_material" => "required|unique:materiales,nombre_material",
+            "nombre_material" => "required",
             "costo" => "required",
             "cantidad" => "required",
             "nit_proveedor" => "required",
@@ -45,6 +45,7 @@ class MaterialeController extends Controller
         }
 
         try {
+            
 
             $materiale = Materiale::create([
                 "referencia_material" => strtoupper(trim($request->referencia_material)),

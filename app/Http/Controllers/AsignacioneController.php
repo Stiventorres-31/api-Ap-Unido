@@ -97,7 +97,7 @@ class AsignacioneController extends Controller
                 if (!$existenciaPresupuesto) {
                     DB::rollBack();
                     return ResponseHelper::error(
-                        500,
+                        400,
                         "No existe presupuesto del material '{$material["referencia_material"]}'"
                     );
                 }
