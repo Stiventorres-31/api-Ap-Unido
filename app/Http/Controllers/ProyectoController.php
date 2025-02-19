@@ -236,7 +236,7 @@ class ProyectoController extends Controller
                     'proyectos.fecha_inicio_proyecto',
                     'proyectos.fecha_final_proyecto',
                     'proyectos.estado'
-                )
+                )->orderByDesc("id")
                 ->paginate(2);
 
             return ResponseHelper::success(200, "Listado de proyectos", ["proyectos" => $proyectos]);
