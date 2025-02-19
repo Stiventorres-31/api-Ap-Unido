@@ -30,32 +30,61 @@ class ProyectoController extends Controller
         }
 
         try {
-            $proyecto = Proyecto::with(["presupuestos.materiale.inventarios", "presupuestos.inmueble.tipo_inmueble"])
+            $proyecto = Proyecto::with([
+                "presupuestos",
+                // "presupuestos.inmueble.tipo_inmueble",
+                "asignaciones.materiale.inventarios",
+                "asignaciones.inmueble.tipo_inmueble",
+            ])
+                ->where("estado", "A")
                 ->where("codigo_proyecto", $codigo_proyecto)->first();
 
-            return $proyecto;
-            //ME FALTA ESTE REPORTE DE PRESUPUESTO
+            $cantidadPresupuestos = $proyecto->presupuestos->count();
+            $cantidadAsignaciones = $proyecto->asignaciones->count();
+
+            $porcentaje_completado = number_format(($cantidadAsignaciones / $cantidadPresupuestos) * 100,2);
+
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+
             $archivoCSV->insertOne([
-                "inmueble_id",
-                // "inmueble_id",
-                "referencia_material",
-                "mombre_material",
-                "costo_material",
-                "Cantidad_material",
-                "subtotal"
+                "Este proyecto lleva un " . $porcentaje_completado . "% completado"
             ]);
 
-            foreach ($inmueble->presupuestos as $presupuesto) {
+            $archivoCSV->insertOne([
+                "inmueble_id",
+                "tipo_inmueble",
+                "referencia_material",
+                "mombre_material",
+                "consecutivo",
+                "costo_material",
+                "Cantidad_material",
+                "subtotal",
+                "cantidad_presupuestado",
+                "porcentaje_usado"
+            ]);
+
+            foreach ($proyecto->asignaciones as $asignacion) {
+                $presupuesto = Presupuesto::select("cantidad_material")->where(
+                    "inmueble_id",
+                    $asignacion["inmueble_id"]
+                )
+                    ->where("materiale_id", $asignacion["materiale_id"])
+                    ->first();
+
                 $archivoCSV->insertOne([
-                    $inmueble->proyecto->codigo_proyecto,
-                    // $presupuesto["inmueble_id"],
-                    $presupuesto["materiale"]["referencia_material"],
-                    $presupuesto["materiale"]["nombre_material"],
-                    $presupuesto["costo_material"],
-                    $presupuesto["cantidad_material"],
+                    // $proyecto->codigo_proyecto,
+                    $asignacion["inmueble_id"],
+                    $asignacion["inmueble"]["tipo_inmueble"]["nombre_tipo_inmueble"],
+                    $asignacion["materiale"]["referencia_material"],
+                    $asignacion["materiale"]["nombre_material"],
+                    $asignacion["consecutivo"],
+                    $asignacion["costo_material"],
+                    $asignacion["cantidad_material"],
+                    $asignacion["subtotal"],
+                    $presupuesto->cantidad_material,
+                    number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
                 ]);
             }
             $response = new StreamedResponse(function () use ($archivoCSV) {
@@ -190,12 +219,12 @@ class ProyectoController extends Controller
 
                 ->withSum("presupuestos as total_presupuesto", "subtotal")
                 ->leftJoin('presupuestos', 'proyectos.id', '=', 'presupuestos.proyecto_id')
-                
+
                 ->withSum("asignaciones as total_asignacion", "subtotal")
                 ->leftJoin('asignaciones', 'proyectos.id', '=', 'asignaciones.proyecto_id')
-                
+
                 ->where('proyectos.estado', 'A')
-                
+
                 ->groupBy(
                     'proyectos.id',
                     'proyectos.codigo_proyecto',
@@ -344,9 +373,9 @@ class ProyectoController extends Controller
             }
             //SE FALTA VALIDAR SI TIENE ASIGNACIONES Y/O PRESUPUESTO ASIGNADO
 
-            $proyecto = Proyecto::where("codigo_proyecto",$request->codigo_proyecto)
-            ->where("estado","A")
-            ->first();
+            $proyecto = Proyecto::where("codigo_proyecto", $request->codigo_proyecto)
+                ->where("estado", "A")
+                ->first();
             $presupuestos = Presupuesto::where("proyecto_id", $proyecto->id)->exists();
             $asignaciones = Asignacione::where("proyecto_id", $proyecto->id)->exists();
 

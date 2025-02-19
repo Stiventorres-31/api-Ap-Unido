@@ -222,10 +222,10 @@ class InmuebleController extends Controller
                 ->find($id);
 
 
-            if(!$inmueble->asignaciones){
-                return ResponseHelper::error(404,"Este inmueble no tiene asignaciones");
+            if (!$inmueble->asignaciones) {
+                return ResponseHelper::error(404, "Este inmueble no tiene asignaciones");
             }
-                // return $inmueble;
+            // return $inmueble;
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
@@ -238,10 +238,15 @@ class InmuebleController extends Controller
                 "consecutivo",
                 "costo_material",
                 "Cantidad_material",
-                "subtotal"
+                "subtotal",
+                "cantidad_presupuestado",
+                "porcentaje_usado"
             ]);
 
             foreach ($inmueble->asignaciones as $asignacion) {
+                $presupuesto = Presupuesto::select("cantidad_material")->where("inmueble_id", $id)
+                    ->where("materiale_id", $asignacion->materiale_id)
+                    ->first();
                 $archivoCSV->insertOne([
                     $inmueble->proyecto->codigo_proyecto,
                     // $presupuesto["inmueble_id"],
@@ -251,6 +256,8 @@ class InmuebleController extends Controller
                     $asignacion["costo_material"],
                     $asignacion["cantidad_material"],
                     $asignacion["subtotal"],
+                    $presupuesto->cantidad_material,
+                    number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100,2)
                 ]);
             }
             $response = new StreamedResponse(function () use ($archivoCSV) {
