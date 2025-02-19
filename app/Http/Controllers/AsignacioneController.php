@@ -78,7 +78,7 @@ class AsignacioneController extends Controller
 
                 $existenciaAsingacion = Asignacione::where("materiale_id", $materialAsignar->id)
                     ->where("consecutivo", $material["consecutivo"])
-                    ->where("material_id", $request->inmueble_id)
+                    ->where("inmueble_id", $request->inmueble_id)
                     ->exists();
 
                 if ($existenciaAsingacion) {
