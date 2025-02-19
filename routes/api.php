@@ -28,7 +28,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/",[UserController::class,"index"]);
         Route::get("/{numero_identificacion}",[UserController::class,"show"]);
         Route::put("/{numero_identificacion}",[UserController::class,"edit"]);
-        Route::delete("/{numero_identificacion}",[UserController::class,"destroy"]);
+        Route::delete("/",[UserController::class,"destroy"]);
     });
     Route::prefix('materiale')->group(function () {
         Route::get("/", [MaterialeController::class, "index"]);
