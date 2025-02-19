@@ -58,6 +58,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/", [ProyectoController::class, "index"]);
         Route::get("/select", [ProyectoController::class, "select"]);
         Route::get("/{codigo_proyecto}", [ProyectoController::class, "show"]);
+        Route::get("/similitud/{codigo_proyecto}", [ProyectoController::class, "search"]);
         Route::post("/", [ProyectoController::class, "store"]);
         Route::put("/{codigo_proyecto}", [ProyectoController::class, "edit"]);
         Route::get("/presupuesto/{codigo_proyecto}", [ProyectoController::class, "showWithPresupuesto"]);

@@ -19,6 +19,28 @@ use Throwable;
 class ProyectoController extends Controller
 {
 
+    public function search($codigo_proyecto)
+    {
+        $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
+            "codigo_proyecto" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
+        try {
+            //BUSCAR LOS PROYECTO QUE COMIENCEN CON EL VALOR QUE INGRESE EL USUARIO
+            $proyectos = Proyecto::where("codigo_proyecto", "LIKE",  $codigo_proyecto . "%")
+                ->where("estado", "A")
+                ->get();
+
+            return ResponseHelper::success(200, "Busqueda exitosa", ["proyectos" => $proyectos]);
+        } catch (Throwable $th) {
+            Log::error("Error al buscar un proyecto por LIKE" . $th->getMessage());
+            return ResponseHelper::error(500, "Error interno en el servidor");
+        }
+    }
     public function generarReporte($codigo_proyecto)
     {
         $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
@@ -43,7 +65,7 @@ class ProyectoController extends Controller
             $cantidadPresupuestos = $proyecto->presupuestos->count();
             $cantidadAsignaciones = $proyecto->asignaciones->count();
 
-            $porcentaje_completado = number_format(($cantidadAsignaciones / $cantidadPresupuestos) * 100,2);
+            $porcentaje_completado = number_format(($cantidadAsignaciones / $cantidadPresupuestos) * 100, 2);
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
