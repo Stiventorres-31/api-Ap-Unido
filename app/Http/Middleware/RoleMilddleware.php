@@ -23,8 +23,11 @@ class RoleMilddleware
         // return response()->json($request->route()->uri());
 
         if ($request->user()->rol_usuario === "CONSULTOR") {
+
             return ResponseHelper::error(403, "No estas autorizado para esta acción");
+
         } else if ($request->user()->rol_usuario === "OPERARIO" && $request->route()->uri() !== "api/asignacione"){
+            
             return ResponseHelper::error(403, "No estas autorizado para esta acción");
         }else{
             return $next($request);

@@ -105,6 +105,7 @@ class UserController extends Controller
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
 
+        //VALIDAR QUE NO SE PUEDA ELIMINAR EL MISMO USUARIO LOGUEADO Y SOLO EL ADMIN PUEDE ELIMINAR USUARIO
         try {
             $user = User::where("numero_identificacion", $request->numero_identificacion)->first();
             $user->estado = "I";

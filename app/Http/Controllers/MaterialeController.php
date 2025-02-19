@@ -47,7 +47,7 @@ class MaterialeController extends Controller
         try {
 
             $materiale = Materiale::create([
-                "referencia_material" => $request->referencia_material,
+                "referencia_material" => strtoupper(trim($request->referencia_material)),
                 "nombre_material" => strtoupper(trim($request->nombre_material)),
                 "user_id" => Auth::user()->id
             ]);
