@@ -84,7 +84,7 @@ class AsignacioneController extends Controller
                 if ($existenciaAsingacion) {
                     DB::rollBack();
                     return ResponseHelper::error(
-                        500,
+                        400,
                         "Ya existe asignación del material '{$material["referencia_material"]}' con lote '{$material["consecutivo"]}'"
                     );
                 }
