@@ -91,20 +91,20 @@ class ProyectoController extends Controller
                 ->where("codigo_proyecto", $codigo_proyecto)->first();
 
             // return $proyecto;
-            $totalPresupuestado = $proyecto->presupuestos->sum("subtotal");
-            $totalAsignado = $proyecto->asignaciones->sum("subtotal");
+            // $totalPresupuestado = $proyecto->presupuestos->sum("subtotal");
+            // $totalAsignado = $proyecto->asignaciones->sum("subtotal");
 
-            $porcentaje_completado = round($totalPresupuestado > 0
-                ? ($totalAsignado / $totalPresupuestado) * 100
-                : 0);
+            // $porcentaje_completado = round($totalPresupuestado > 0
+            //     ? ($totalAsignado / $totalPresupuestado) * 100
+            //     : 0);
             // return $porcentaje_completado;
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
 
-            $archivoCSV->insertOne([
-                "Este proyecto lleva un " . $porcentaje_completado . "% completado"
-            ]);
+            // $archivoCSV->insertOne([
+            //     "Este proyecto lleva un " . $porcentaje_completado . "% completado"
+            // ]);
 
             $archivoCSV->insertOne([
                 "inmueble_id",
