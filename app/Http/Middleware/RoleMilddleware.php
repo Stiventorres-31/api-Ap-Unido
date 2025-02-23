@@ -22,16 +22,16 @@ class RoleMilddleware
         Log::info($request->user());
         // return response()->json($request->route()->uri());
 
-        if ($request->user()->rol_usuario === "CONSULTOR") {
+        // if ($request->user()->rol_usuario === "CONSULTOR") {
 
-            return ResponseHelper::error(401, "No estas autorizado para esta acción");
+        //     return ResponseHelper::error(401, "No estas autorizado para esta acción");
 
-        } else if ($request->user()->rol_usuario === "OPERARIO" && $request->route()->uri() !== "api/asignacione"){
+        // } else if ($request->user()->rol_usuario === "OPERARIO" && $request->route()->uri() !== "api/asignacione"){
 
-            return ResponseHelper::error(401, "No estas autorizado para esta acción");
-        }else{
+        //     return ResponseHelper::error(401, "No estas autorizado para esta acción");
+        // }else{
             return $next($request);
-        }
+        // }
         
     }
 }
