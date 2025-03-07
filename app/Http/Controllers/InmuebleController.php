@@ -355,7 +355,7 @@ class InmuebleController extends Controller
             if (!$inmueble->asignaciones) {
                 return ResponseHelper::error(404, "Este inmueble no tiene asignaciones");
             }
-            // return $inmueble;
+            
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
@@ -370,6 +370,7 @@ class InmuebleController extends Controller
                 "Cantidad_material",
                 "subtotal",
                 "cantidad_presupuestado",
+                "fecha_asignacion",
                 // "porcentaje_usado"
             ]);
 
@@ -387,6 +388,7 @@ class InmuebleController extends Controller
                     $asignacion["cantidad_material"],
                     $asignacion["subtotal"],
                     $presupuesto->cantidad_material,
+                    $asignacion["created_at"],
                     // number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
                 ]);
             }
