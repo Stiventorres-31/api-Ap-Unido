@@ -358,7 +358,7 @@ class InmuebleController extends Controller
             // return $inmueble;
 
             $archivoCSV = Writer::createFromString('');
-            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setDelimiter(",");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
             $archivoCSV->insertOne([
                 "codigo_proyecto",

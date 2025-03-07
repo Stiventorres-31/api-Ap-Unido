@@ -100,7 +100,7 @@ class ProyectoController extends Controller
             //     : 0);
             // return $porcentaje_completado;
             $archivoCSV = Writer::createFromString('');
-            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setDelimiter(",");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
 
             // $archivoCSV->insertOne([
@@ -202,7 +202,7 @@ class ProyectoController extends Controller
 
             
             $archivoCSV = Writer::createFromString('');
-            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setDelimiter(",");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
 
            
