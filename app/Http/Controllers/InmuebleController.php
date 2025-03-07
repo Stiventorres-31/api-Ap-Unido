@@ -255,7 +255,7 @@ class InmuebleController extends Controller
                 'materiales.referencia_material',
                 'materiales.nombre_material',
 
-                'presupuestos.costo_material',
+                // 'presupuestos.costo_material',
                
                 'presupuestos.inmueble_id',
 
@@ -275,20 +275,20 @@ class InmuebleController extends Controller
                 'asignaciones.cantidad_material',
 
                 
-                DB::raw('MAX(presupuestos.costo_material) as costo_material_presupuesto'),
-                DB::raw('MAX(asignaciones.costo_material) as costo_material_asignado'),
+                //DB::raw('SUM(presupuestos.costo_material) as costo_material_presupuesto'),
+                // DB::raw('SUM(asignaciones.costo_material) as costo_material_asignado'),
 
                
 
                 DB::raw('COALESCE(SUM(asignaciones.cantidad_material), 0) as cantidad_material_asignado'),
                 // DB::raw('COALESCE(SUM(presupuestos.cantidad_material), 0) as cantidad_material_resupuesto'),
                 DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
-                DB::raw('(presupuestos.cantidad_material * presupuestos.costo_material) as subtotal_presupuesto'),
-                DB::raw('(asignaciones.cantidad_material * asignaciones.costo_material) as subtotal_asignado')
+                DB::raw('SUM(presupuestos.subtotal) as subtotal_presupuesto'),
+                DB::raw('SUM(asignaciones.subtotal) as subtotal_asignado')
             )
             ->get();
 
-            // return response()->json($reportesInmuebles);
+            return response()->json($reportesInmuebles);
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
@@ -298,11 +298,11 @@ class InmuebleController extends Controller
                 "referencia_material",
                 "nombre_material",
                 
-                "costo_material_presupuesto",
+                // "costo_material_presupuesto",
                 "Cantidad_material_presupuesto",
                 "subtotal_presupuesto",
 
-                "costo_material_asignado",
+                // "costo_material_asignado",
                 "Cantidad_material_asignado",
                 "subtotal_asignado",
                 "restante"
@@ -370,7 +370,7 @@ class InmuebleController extends Controller
                 "Cantidad_material",
                 "subtotal",
                 "cantidad_presupuestado",
-                "porcentaje_usado"
+                // "porcentaje_usado"
             ]);
 
             foreach ($inmueble->asignaciones as $asignacion) {
@@ -387,7 +387,7 @@ class InmuebleController extends Controller
                     $asignacion["cantidad_material"],
                     $asignacion["subtotal"],
                     $presupuesto->cantidad_material,
-                    number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
+                    // number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
                 ]);
             }
             $response = new StreamedResponse(function () use ($archivoCSV) {
