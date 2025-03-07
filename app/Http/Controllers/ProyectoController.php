@@ -90,10 +90,11 @@ class ProyectoController extends Controller
                 ->where("estado", "A")
                 ->where("codigo_proyecto", $codigo_proyecto)->first();
 
+            $totalAsignado = $proyecto->asignaciones->sum("subtotal");
             // return $proyecto;
             // $totalPresupuestado = $proyecto->presupuestos->sum("subtotal");
-            // $totalAsignado = $proyecto->asignaciones->sum("subtotal");
 
+            //return response()->json($proyecto);
             // $porcentaje_completado = round($totalPresupuestado > 0
             //     ? ($totalAsignado / $totalPresupuestado) * 100
             //     : 0);
@@ -111,8 +112,8 @@ class ProyectoController extends Controller
                 "tipo_inmueble",
                 "referencia_material",
                 "mombre_material",
-                "consecutivo",
-                "costo_material",
+                // "consecutivo",
+                // "costo_material",
                 "Cantidad_material",
                 "subtotal",
                 "cantidad_presupuestado",
@@ -120,6 +121,7 @@ class ProyectoController extends Controller
             ]);
 
             foreach ($proyecto->asignaciones as $asignacion) {
+
                 $presupuesto = Presupuesto::select("cantidad_material")->where(
                     "inmueble_id",
                     $asignacion["inmueble_id"]
@@ -133,14 +135,106 @@ class ProyectoController extends Controller
                     $asignacion["inmueble"]["tipo_inmueble"]["nombre_tipo_inmueble"],
                     $asignacion["materiale"]["referencia_material"],
                     $asignacion["materiale"]["nombre_material"],
-                    $asignacion["consecutivo"],
-                    $asignacion["costo_material"],
+                    // $asignacion["consecutivo"],
+                    // $asignacion["costo_material"],
                     $asignacion["cantidad_material"],
-                    $asignacion["subtotal"],
+                    // $asignacion["subtotal"],
+                    $totalAsignado,
                     $presupuesto->cantidad_material,
                     number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
                 ]);
             }
+            $response = new StreamedResponse(function () use ($archivoCSV) {
+                echo $archivoCSV->toString();
+            });
+
+            // Establece las cabeceras adecuadas
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
+
+            return $response;
+        } catch (Throwable $th) {
+            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
+            return ResponseHelper::error(
+                500,
+                "Error interno en el servidor",
+                ["error" => $th->getMessage()]
+            );
+        }
+    }
+
+    public function generarReportePrueba($codigo_proyecto)
+    {
+        try {
+            $datos = DB::table('asignaciones')
+                ->join('presupuestos', function ($join) {
+                    $join->on('asignaciones.inmueble_id', '=', 'presupuestos.inmueble_id')
+                        ->on('asignaciones.materiale_id', '=', 'presupuestos.materiale_id');
+                })
+                ->join('inmuebles', 'asignaciones.inmueble_id', '=', 'inmuebles.id')
+                ->join('tipo_inmuebles', 'inmuebles.tipo_inmueble_id', '=', 'tipo_inmuebles.id')
+                ->join('materiales', 'asignaciones.materiale_id', '=', 'materiales.id')
+                ->join('proyectos', 'asignaciones.proyecto_id', '=', 'proyectos.id')
+                ->where('proyectos.codigo_proyecto', $codigo_proyecto)
+                ->groupBy(
+                    'asignaciones.inmueble_id',
+                    'proyectos.codigo_proyecto',
+                    'inmuebles.tipo_inmueble_id',
+                    'materiales.referencia_material',
+                    'materiales.nombre_material',
+                    'presupuestos.cantidad_material'
+                )
+                ->select(
+                    'asignaciones.inmueble_id',
+                    // 'inmuebles.tipo_inmueble_id',
+                    'proyectos.codigo_proyecto',
+                    'tipo_inmuebles.nombre_tipo_inmueble',
+                    'asignaciones.proyecto_id',
+                    // 'asignaciones.cantidad_material',
+                    // 'asignaciones.subtotal',
+                    DB::raw('SUM(asignaciones.cantidad_material) as cantidad_material'),
+                    DB::raw('SUM(asignaciones.subtotal) as subtotal'),
+                    'presupuestos.cantidad_material as cantidad_presupuestado',
+                    'materiales.nombre_material',
+                    'materiales.referencia_material'
+                )
+                ->get();
+            $archivoCSV = Writer::createFromString('');
+            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+
+           
+
+            $archivoCSV->insertOne([
+                "inmueble_id",
+                "tipo_inmueble",
+                "referencia_material",
+                "mombre_material",
+                // "consecutivo",
+                // "costo_material",
+                "Cantidad_material",
+                "subtotal",
+                "cantidad_presupuestado",
+                // "porcentaje_usado"
+            ]);
+
+            foreach ($datos as $key => $dato) {
+                $archivoCSV->insertOne([
+                    "inmueble_id"=>$dato->inmueble_id,
+                    "tipo_inmueble"=>$dato->nombre_tipo_inmueble,
+                    "referencia_material"=>$dato->referencia_material,
+                    "mombre_material"=>$dato->nombre_material,
+                    // "consecutivo",
+                    // "costo_material",
+                    "Cantidad_material"=>$dato->cantidad_material,
+                    "subtotal"=>$dato->subtotal,
+                    "cantidad_presupuestado"=>$dato->cantidad_presupuestado,
+                    // "porcentaje_usado"
+                ]);
+            }
+
+            // $archivoCSV->insertAll($datos);
+
             $response = new StreamedResponse(function () use ($archivoCSV) {
                 echo $archivoCSV->toString();
             });

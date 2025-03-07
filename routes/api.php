@@ -97,6 +97,6 @@ Route::middleware("auth:api")->group(function(){
     });
 });
 //Route::get("inmuebles/report/{id}", [InmuebleController::class, "generarReporte"]);
-// Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);
+Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
 // Route::get("/report/asignacione/{id}", [InmuebleController::class, "generarReporteAsignacion"]);
 
