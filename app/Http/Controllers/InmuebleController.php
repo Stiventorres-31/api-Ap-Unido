@@ -9,6 +9,7 @@ use App\Models\Presupuesto;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -167,7 +168,7 @@ class InmuebleController extends Controller
                 ->find($id);
 
             $archivoCSV = Writer::createFromString('');
-            $archivoCSV->setDelimiter(";");
+            $archivoCSV->setDelimiter(",");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
             $archivoCSV->insertOne([
                 "codigo_proyecto",
@@ -205,6 +206,128 @@ class InmuebleController extends Controller
                 ["error" => $th->getMessage()]
             );
         }
+    }
+
+    public function generarReportePrueba($id)
+    {
+        // $reporteInmueble = DB::table('presupuestos')
+        // ->join('materiales', 'presupuestos.materiale_id', '=', 'materiales.id')
+        // ->join('inmuebles', 'presupuestos.inmueble_id', '=', 'inmuebles.id')
+        // ->join('proyectos', 'presupuestos.proyecto_id', '=', 'proyectos.id')
+        // ->leftJoin('asignaciones', function ($join) {
+        //     $join->on('presupuestos.inmueble_id', '=', 'asignaciones.inmueble_id')
+        //          ->on('presupuestos.materiale_id', '=', 'asignaciones.materiale_id');
+        // })
+        // ->where('presupuestos.inmueble_id', $id)
+        // ->groupBy(
+        //     'proyectos.codigo_proyecto',
+        //     'materiales.referencia_material',
+        //     'materiales.nombre_material',
+        //     'presupuestos.costo_material',
+        //     'presupuestos.cantidad_material'
+        // )
+        // ->select(
+        //     'proyectos.codigo_proyecto',
+        //     'materiales.referencia_material',
+        //     'materiales.nombre_material',
+        //     'presupuestos.costo_material',
+        //     'presupuestos.cantidad_material',
+        //     DB::raw('SUM(asignaciones.cantidad_material) as cantidad_material_asignado'),
+        //     DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
+        //     DB::raw('(presupuestos.cantidad_material * presupuestos.costo_material) as subtotal')
+        // )
+        // ->get();
+
+        DB::reconnect();
+        $reportesInmuebles = DB::table('presupuestos')
+            ->join('materiales', 'presupuestos.materiale_id', '=', 'materiales.id')
+            ->join('inmuebles', 'presupuestos.inmueble_id', '=', 'inmuebles.id')
+            ->join('proyectos', 'presupuestos.proyecto_id', '=', 'proyectos.id')
+            ->leftJoin('asignaciones', function ($join) {
+                $join->on('presupuestos.inmueble_id', '=', 'asignaciones.inmueble_id')
+                    ->on('presupuestos.materiale_id', '=', 'asignaciones.materiale_id');
+            })
+            ->where("presupuestos.inmueble_id", $id)
+            ->where("inmuebles.estado", "A")
+            ->groupBy(
+
+                'proyectos.codigo_proyecto',
+                'materiales.referencia_material',
+                'materiales.nombre_material',
+
+                'presupuestos.costo_material',
+                'presupuestos.cantidad_material',
+                'presupuestos.inmueble_id',
+
+                'asignaciones.costo_material',
+                'asignaciones.cantidad_material',
+                'asignaciones.inmueble_id'
+            )
+            ->select(
+                "inmuebles.id",
+                'proyectos.codigo_proyecto',
+                'materiales.referencia_material',
+                'materiales.nombre_material',
+
+                'presupuestos.costo_material',
+                'presupuestos.cantidad_material',
+
+                'asignaciones.costo_material as costo_material_asginado',
+                'asignaciones.cantidad_material',
+
+                DB::raw('COALESCE(SUM(asignaciones.cantidad_material), 0) as cantidad_material_asignado'),
+                DB::raw('COALESCE(SUM(presupuestos.cantidad_material), 0) as cantidad_material_resupuesto'),
+                DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
+                DB::raw('(presupuestos.cantidad_material * presupuestos.costo_material) as subtotal_presupuesto'),
+                DB::raw('(asignaciones.cantidad_material * asignaciones.costo_material) as subtotal_asignado')
+            )
+            ->get();
+
+            $archivoCSV = Writer::createFromString('');
+            $archivoCSV->setDelimiter(",");
+            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+            $archivoCSV->insertOne([
+                // "inmueble_id",
+                "referencia_material",
+                "mombre_material",
+                
+                "costo_material_presupuesto",
+                "Cantidad_material_presupuesto",
+                "subtotal_presupuesto",
+
+                "costo_material_asignado",
+                "Cantidad_material_asignado",
+                "subtotal_asignado",
+                "restante"
+            ]);
+
+            foreach ($reportesInmuebles as $reporteInmueble) {
+                $archivoCSV->insertOne([
+                    // $reporteInmueble->inmueble_id,
+                    $reporteInmueble->referencia_material,
+                    $reporteInmueble->nombre_material,
+
+                    $reporteInmueble->costo_material,
+                    $reporteInmueble->cantidad_material_resupuesto,
+                    $reporteInmueble->subtotal_presupuesto,
+
+                    $reporteInmueble->costo_material_asginado,
+                    $reporteInmueble->cantidad_material_asignado,
+                    $reporteInmueble->subtotal_asignado,
+                    
+                    $reporteInmueble->restante,
+                ]);
+            }
+            $response = new StreamedResponse(function () use ($archivoCSV) {
+                echo $archivoCSV->toString();
+            });
+
+            // Establece las cabeceras adecuadas
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
+
+            return $response;
+
     }
 
     public function generarReporteAsignacion($id)
@@ -257,7 +380,7 @@ class InmuebleController extends Controller
                     $asignacion["cantidad_material"],
                     $asignacion["subtotal"],
                     $presupuesto->cantidad_material,
-                    number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100,2)
+                    number_format(($asignacion["cantidad_material"] / $presupuesto->cantidad_material) * 100, 2)
                 ]);
             }
             $response = new StreamedResponse(function () use ($archivoCSV) {
