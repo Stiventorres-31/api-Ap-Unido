@@ -64,7 +64,7 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/presupuesto/{codigo_proyecto}", [ProyectoController::class, "showWithPresupuesto"]);
         Route::get("/asignacion/{codigo_proyecto}", [ProyectoController::class, "showWithAsignacion"]);
         Route::delete("/", [ProyectoController::class, 'destroy']);
-        Route::get("/report/{codigo_proyecto}", [ProyectoController::class, "generarReporte"]);
+        Route::get("/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
     });
     
     Route::middleware("rol")->prefix('inmueble')->group(function () {

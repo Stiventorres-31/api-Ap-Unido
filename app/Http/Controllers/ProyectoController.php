@@ -199,6 +199,8 @@ class ProyectoController extends Controller
                     'materiales.referencia_material'
                 )
                 ->get();
+
+            
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(";");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);

@@ -256,12 +256,12 @@ class InmuebleController extends Controller
                 'materiales.nombre_material',
 
                 'presupuestos.costo_material',
-                'presupuestos.cantidad_material',
+               
                 'presupuestos.inmueble_id',
 
-                'asignaciones.costo_material',
-                'asignaciones.cantidad_material',
-                'asignaciones.inmueble_id'
+                // 'asignaciones.costo_material',
+                // 'asignaciones.cantidad_material',
+                // 'asignaciones.inmueble_id'
             )
             ->select(
                 "inmuebles.id",
@@ -270,18 +270,25 @@ class InmuebleController extends Controller
                 'materiales.nombre_material',
 
                 'presupuestos.costo_material',
-                'presupuestos.cantidad_material',
+                'presupuestos.cantidad_material as cantidad_material_resupuesto',
 
-                'asignaciones.costo_material as costo_material_asginado',
                 'asignaciones.cantidad_material',
 
+                
+                DB::raw('MAX(presupuestos.costo_material) as costo_material_presupuesto'),
+                DB::raw('MAX(asignaciones.costo_material) as costo_material_asignado'),
+
+               
+
                 DB::raw('COALESCE(SUM(asignaciones.cantidad_material), 0) as cantidad_material_asignado'),
-                DB::raw('COALESCE(SUM(presupuestos.cantidad_material), 0) as cantidad_material_resupuesto'),
+                // DB::raw('COALESCE(SUM(presupuestos.cantidad_material), 0) as cantidad_material_resupuesto'),
                 DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
                 DB::raw('(presupuestos.cantidad_material * presupuestos.costo_material) as subtotal_presupuesto'),
                 DB::raw('(asignaciones.cantidad_material * asignaciones.costo_material) as subtotal_asignado')
             )
             ->get();
+
+            // return response()->json($reportesInmuebles);
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
@@ -289,7 +296,7 @@ class InmuebleController extends Controller
             $archivoCSV->insertOne([
                 // "inmueble_id",
                 "referencia_material",
-                "mombre_material",
+                "nombre_material",
                 
                 "costo_material_presupuesto",
                 "Cantidad_material_presupuesto",
@@ -307,11 +314,11 @@ class InmuebleController extends Controller
                     $reporteInmueble->referencia_material,
                     $reporteInmueble->nombre_material,
 
-                    $reporteInmueble->costo_material,
+                    $reporteInmueble->costo_material_presupuesto,
                     $reporteInmueble->cantidad_material_resupuesto,
                     $reporteInmueble->subtotal_presupuesto,
 
-                    $reporteInmueble->costo_material_asginado,
+                    $reporteInmueble->costo_material_asignado,
                     $reporteInmueble->cantidad_material_asignado,
                     $reporteInmueble->subtotal_asignado,
                     
