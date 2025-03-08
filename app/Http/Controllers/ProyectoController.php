@@ -196,16 +196,18 @@ class ProyectoController extends Controller
                     DB::raw('SUM(asignaciones.subtotal) as subtotal'),
                     'presupuestos.cantidad_material as cantidad_presupuestado',
                     'materiales.nombre_material',
-                    'materiales.referencia_material'
+                    'materiales.referencia_material',
+                    DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
+
                 )
                 ->get();
 
-            
+
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
             $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
 
-           
+
 
             $archivoCSV->insertOne([
                 "inmueble_id",
@@ -214,24 +216,26 @@ class ProyectoController extends Controller
                 "mombre_material",
                 // "consecutivo",
                 // "costo_material",
-                "Cantidad_material",
+                "Cantidad_material_asignado",
                 "subtotal",
                 "cantidad_presupuestado",
-                // "porcentaje_usado"
+                "restante",
+                "porcentaje_usado"
             ]);
 
             foreach ($datos as $key => $dato) {
                 $archivoCSV->insertOne([
-                    "inmueble_id"=>$dato->inmueble_id,
-                    "tipo_inmueble"=>$dato->nombre_tipo_inmueble,
-                    "referencia_material"=>$dato->referencia_material,
-                    "mombre_material"=>$dato->nombre_material,
+                    "inmueble_id" => $dato->inmueble_id,
+                    "tipo_inmueble" => $dato->nombre_tipo_inmueble,
+                    "referencia_material" => $dato->referencia_material,
+                    "mombre_material" => $dato->nombre_material,
                     // "consecutivo",
                     // "costo_material",
-                    "Cantidad_material"=>$dato->cantidad_material,
-                    "subtotal"=>$dato->subtotal,
-                    "cantidad_presupuestado"=>$dato->cantidad_presupuestado,
-                    // "porcentaje_usado"
+                    "Cantidad_material_asignado" => $dato->cantidad_material,
+                    "subtotal" => $dato->subtotal,
+                    "cantidad_presupuestado" => $dato->cantidad_presupuestado,
+                    "restante" => $dato->restante,
+                    "porcentaje_usado" => max(0, ($dato->cantidad_material / $dato->cantidad_presupuestado) * 100)
                 ]);
             }
 
