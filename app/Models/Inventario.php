@@ -17,6 +17,8 @@ class Inventario extends Model
         "estado"
     ];
 
+   
+
     public function usuario(){
         return $this->belongsTo(User::class,"user_id");
     }

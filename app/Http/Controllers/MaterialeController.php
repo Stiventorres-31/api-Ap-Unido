@@ -7,6 +7,7 @@ use App\Models\Inventario;
 use App\Models\Materiale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,13 +16,28 @@ class MaterialeController extends Controller
     public function index()
     {
         try {
-            $materiale = Materiale::with("usuario")
-            ->where("estado", "A")
+            $materiales = DB::table('materiales')
+            ->leftJoin('inventarios', 'materiales.id', '=', 'inventarios.materiale_id')
+            ->where('materiales.estado','A')
+            ->select(
+                'materiales.id',
+                'materiales.referencia_material',
+                'materiales.nombre_material',
+                DB::raw('COALESCE(SUM(inventarios.cantidad), 0) as cantidad_total_de_material'),
+                'materiales.estado'
+            )
+            ->groupBy(
+                'materiales.id',
+                'materiales.referencia_material',
+                'materiales.nombre_material',
+                'materiales.estado'
+            )
+            ->orderByDesc('cantidad_total_de_material')
             ->get();
             return ResponseHelper::success(
                 200,
                 "Se ha obtenido todos los materiales",
-                ["materiales" => $materiale]
+                ["materiales" => $materiales]
             );
         } catch (\Throwable $th) {
             Log::error("Error al obtener todos los materiales " . $th->getMessage());
