@@ -288,7 +288,7 @@ class InmuebleController extends Controller
             )
             ->get();
 
-            return response()->json($reportesInmuebles);
+           
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
