@@ -314,11 +314,11 @@ class InmuebleController extends Controller
                     $reporteInmueble->referencia_material,
                     $reporteInmueble->nombre_material,
 
-                    $reporteInmueble->costo_material_presupuesto,
+                    // $reporteInmueble->costo_material_presupuesto,
                     $reporteInmueble->cantidad_material_resupuesto,
                     $reporteInmueble->subtotal_presupuesto,
 
-                    $reporteInmueble->costo_material_asignado,
+                    // $reporteInmueble->costo_material_asignado,
                     $reporteInmueble->cantidad_material_asignado,
                     $reporteInmueble->subtotal_asignado,
                     
