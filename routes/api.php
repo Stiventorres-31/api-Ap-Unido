@@ -66,7 +66,7 @@ Route::middleware("auth:api")->group(function(){
         Route::delete("/", [ProyectoController::class, 'destroy']);
         Route::get("/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
     });
-    
+
     Route::middleware("rol")->prefix('inmueble')->group(function () {
         Route::get("/", [InmuebleController::class, "index"]);
         Route::get("/{id}", [InmuebleController::class, "show"]);
@@ -75,9 +75,9 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/report/asignacion/{id}", [InmuebleController::class, "generarReporteAsignacion"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
         Route::delete("/", [InmuebleController::class, 'destroy']);
-        
+
     });
-    
+
     Route::middleware("rol")->prefix('presupuesto')->group(function () {
         // Route::get("/", [PresupuestoController::class, "index"]);
         // Route::get("/{id}", [PresupuestoController::class, "show"]);
@@ -97,7 +97,7 @@ Route::middleware("auth:api")->group(function(){
     });
 });
 //Route::get("inmuebles/report/{id}", [InmuebleController::class, "generarReporte"]);
-Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
-Route::get("/reporte/{id}", [InmuebleController::class, "generarReportePrueba"]);
+// Route::get("proyectos/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
+// Route::get("/reporte/{id}", [InmuebleController::class, "generarReportePrueba"]);
 // Route::get("/report/asignacione/{id}", [InmuebleController::class, "generarReporteAsignacion"]);
 
