@@ -290,9 +290,9 @@ class ProyectoController extends Controller
                 unset($inmueble['presupuestos']);
             }
 
-            return ResponseHelper::success(200, "Proyecto obtenido", ["proyecto" => $proyectoArray]);
+            return ResponseHelper::success(200, "Taller obtenido", ["proyecto" => $proyectoArray]);
         } catch (Throwable $th) {
-            Log::error("error al consultar un proyecto con el presupuesto " . $th->getMessage());
+            Log::error("error al consultar un taller con el presupuesto " . $th->getMessage());
             return ResponseHelper::error(500, "Error interno en el servidor", ["error" => $th->getMessage()]);
         }
     }
@@ -317,7 +317,7 @@ class ProyectoController extends Controller
 
             //ME FALTA MOSTRAR SOLO LOS INMUEBLES ACTIVOS
             if (!$proyecto) {
-                return ResponseHelper::error(404, "Proyecto no encontrado");
+                return ResponseHelper::error(404, "Taller no encontrado");
             }
             $proyectoArray = $proyecto->toArray();
 
@@ -392,7 +392,7 @@ class ProyectoController extends Controller
                 )->orderByDesc("id")
                 ->paginate(2);
 
-            return ResponseHelper::success(200, "Listado de proyectos", ["proyectos" => $proyectos]);
+            return ResponseHelper::success(200, "Listado de talleres", ["proyectos" => $proyectos]);
         } catch (Throwable $th) {
             Log::error("Error al obtener todos los proyectos " . $th->getMessage());
             return ResponseHelper::error(
@@ -457,7 +457,7 @@ class ProyectoController extends Controller
         try {
             $proyecto = Proyecto::where("codigo_proyecto", $codigo_proyecto)->first();
             if (!$proyecto) {
-                return ResponseHelper::error(404, "No existe el proyecto");
+                return ResponseHelper::error(404, "No existe el taller");
             }
             return ResponseHelper::success(200, "Se ha encontrado", ["proyecto" => $proyecto]);
         } catch (Throwable $th) {
@@ -537,13 +537,13 @@ class ProyectoController extends Controller
             if ($asignaciones) {
                 return ResponseHelper::error(
                     400,
-                    "No se puede eliminar este proyecto porque tiene una asignacion"
+                    "No se puede eliminar este taller porque tiene una asignacion"
                 );
             }
             if ($presupuestos) {
                 return ResponseHelper::error(
                     400,
-                    "No se puede eliminar este proyecto porque tiene un presupuesto"
+                    "No se puede eliminar este taller porque tiene un presupuesto"
                 );
             }
             $proyecto->estado = "I";

@@ -19,11 +19,11 @@ class TipoInmuebleController extends Controller
 
             return ResponseHelper::success(
                 200,
-                "Se han obtenidos todos los tipos de inmuebles",
+                "Se han obtenidos todos los tipos de vehiculos",
                 ["tipo_inmuebles" => $tipo_inmuebles]
             );
         } catch (\Throwable $th) {
-            Log::error("Error al obtener los tipos de inmuebles " . $th->getMessage());
+            Log::error("Error al obtener los tipos de vehiculos " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -53,7 +53,7 @@ class TipoInmuebleController extends Controller
                 ["tipo_inmueble" => $tipo_inmueble]
             );
         } catch (\Throwable $th) {
-            Log::error("Error al registrar un tipo de inmueble " . $th->getMessage());
+            Log::error("Error al registrar un tipo de vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -81,7 +81,7 @@ class TipoInmuebleController extends Controller
                 ["tipo_inmueble" => $tipo_inmueble]
             );
         } catch (\Throwable $th) {
-            Log::error("Error al registrar un tipo de inmueble " . $th->getMessage());
+            Log::error("Error al consultar un tipo de vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -112,7 +112,7 @@ class TipoInmuebleController extends Controller
                 ["tipo_inmueble" => $tipo_inmueble]
             );
         } catch (\Throwable $th) {
-            Log::error("Error al actualizar un tipo de inmueble " . $th->getMessage());
+            Log::error("Error al actualizar un tipo de vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -132,7 +132,7 @@ class TipoInmuebleController extends Controller
 
             $tipo_inmueble = TipoInmueble::find($request->id);
             $tipo_inmueble->estado = "I" ;
-            $tipo_inmueble->save(); 
+            $tipo_inmueble->save();
 
             return ResponseHelper::success(
                 200,
@@ -140,7 +140,7 @@ class TipoInmuebleController extends Controller
                 []
             );
         } catch (\Throwable $th) {
-            Log::error("Error al eliminar un tipo de inmueble " . $th->getMessage());
+            Log::error("Error al eliminar un tipo de vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",

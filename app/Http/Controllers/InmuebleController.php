@@ -23,9 +23,9 @@ class InmuebleController extends Controller
     {
         try {
             $inmuebles = Inmueble::with(["proyecto", "tipo_inmueble", "usuario"])->where("estado", "A")->get();
-            return ResponseHelper::success(200, "Se ha obtenido todos los inmuebles", ["inmuebles" => $inmuebles]);
+            return ResponseHelper::success(200, "Se ha obtenido todos los vehiculos", ["inmuebles" => $inmuebles]);
         } catch (\Throwable $th) {
-            Log::error("Error al obtener todos los inmuebles " . $th->getMessage());
+            Log::error("Error al obtener todos los vehiculos " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -63,7 +63,7 @@ class InmuebleController extends Controller
 
             return ResponseHelper::success(200, "Se ha registrado con exito");
         } catch (\Throwable $th) {
-            Log::error("Error al registrar un inmueble " . $th->getMessage());
+            Log::error("Error al registrar un vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -91,7 +91,7 @@ class InmuebleController extends Controller
                 ["inmueble" => $inmueble]
             );
         } catch (Throwable $th) {
-            Log::error("Error al consultar un inmueble " . $th->getMessage());
+            Log::error("Error al consultar un vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -125,13 +125,13 @@ class InmuebleController extends Controller
             if ($asignaciones) {
                 return ResponseHelper::error(
                     400,
-                    "No se puede eliminar este inmueble porque tiene una asignacion"
+                    "No se puede eliminar este vehiculo porque tiene una asignacion"
                 );
             }
             if ($presupuestos) {
                 return ResponseHelper::error(
                     400,
-                    "No se puede eliminar este inmueble porque tiene un presupuesto"
+                    "No se puede eliminar este vehiculo porque tiene un presupuesto"
                 );
             }
 
@@ -144,7 +144,7 @@ class InmuebleController extends Controller
                 "Se eliminado con exito"
             );
         } catch (Throwable $th) {
-            Log::error("Error al consultar un inmueble " . $th->getMessage());
+            Log::error("Error al eliminar un vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -199,7 +199,7 @@ class InmuebleController extends Controller
 
             return $response;
         } catch (Throwable $th) {
-            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
+            Log::error("error al generar el reporte de presupuesto de un vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
@@ -256,7 +256,7 @@ class InmuebleController extends Controller
                 'materiales.nombre_material',
 
                 // 'presupuestos.costo_material',
-               
+
                 'presupuestos.inmueble_id',
 
                 // 'asignaciones.costo_material',
@@ -274,11 +274,11 @@ class InmuebleController extends Controller
 
                 'asignaciones.cantidad_material',
 
-                
+
                 //DB::raw('SUM(presupuestos.costo_material) as costo_material_presupuesto'),
                 // DB::raw('SUM(asignaciones.costo_material) as costo_material_asignado'),
 
-               
+
 
                 DB::raw('COALESCE(SUM(asignaciones.cantidad_material), 0) as cantidad_material_asignado'),
                 // DB::raw('COALESCE(SUM(presupuestos.cantidad_material), 0) as cantidad_material_resupuesto'),
@@ -288,7 +288,7 @@ class InmuebleController extends Controller
             )
             ->get();
 
-           
+
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
@@ -297,7 +297,7 @@ class InmuebleController extends Controller
                 // "inmueble_id",
                 "referencia_material",
                 "nombre_material",
-                
+
                 // "costo_material_presupuesto",
                 "Cantidad_material_presupuesto",
                 "subtotal_presupuesto",
@@ -321,7 +321,7 @@ class InmuebleController extends Controller
                     // $reporteInmueble->costo_material_asignado,
                     $reporteInmueble->cantidad_material_asignado,
                     $reporteInmueble->subtotal_asignado,
-                    
+
                     $reporteInmueble->restante,
                 ]);
             }
@@ -355,7 +355,7 @@ class InmuebleController extends Controller
             if (!$inmueble->asignaciones) {
                 return ResponseHelper::error(404, "Este inmueble no tiene asignaciones");
             }
-            
+
 
             $archivoCSV = Writer::createFromString('');
             $archivoCSV->setDelimiter(",");
@@ -402,7 +402,7 @@ class InmuebleController extends Controller
 
             return $response;
         } catch (Throwable $th) {
-            Log::error("error al generar el reporte de presupuesto del inmueble " . $th->getMessage());
+            Log::error("error al generar el reporte de presupuesto de un vehiculo " . $th->getMessage());
             return ResponseHelper::error(
                 500,
                 "Error interno en el servidor",
