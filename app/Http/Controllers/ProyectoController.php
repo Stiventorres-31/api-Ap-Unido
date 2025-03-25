@@ -185,7 +185,7 @@ class ProyectoController extends Controller
             if($request->filled('fecha_desde')){
                 $fecha_desde= $request->fecha_desde;
             }else{
-                $fecha_desde= "";
+                $fecha_desde= 0;
             }
 
             if($request->filled('fecha_hasta')){

@@ -208,35 +208,38 @@ class InmuebleController extends Controller
         }
     }
 
-    public function generarReportePrueba($id)
+    public function generarReportePrueba($id, Request $request)
     {
-        // $reporteInmueble = DB::table('presupuestos')
-        // ->join('materiales', 'presupuestos.materiale_id', '=', 'materiales.id')
-        // ->join('inmuebles', 'presupuestos.inmueble_id', '=', 'inmuebles.id')
-        // ->join('proyectos', 'presupuestos.proyecto_id', '=', 'proyectos.id')
-        // ->leftJoin('asignaciones', function ($join) {
-        //     $join->on('presupuestos.inmueble_id', '=', 'asignaciones.inmueble_id')
-        //          ->on('presupuestos.materiale_id', '=', 'asignaciones.materiale_id');
-        // })
-        // ->where('presupuestos.inmueble_id', $id)
-        // ->groupBy(
-        //     'proyectos.codigo_proyecto',
-        //     'materiales.referencia_material',
-        //     'materiales.nombre_material',
-        //     'presupuestos.costo_material',
-        //     'presupuestos.cantidad_material'
-        // )
-        // ->select(
-        //     'proyectos.codigo_proyecto',
-        //     'materiales.referencia_material',
-        //     'materiales.nombre_material',
-        //     'presupuestos.costo_material',
-        //     'presupuestos.cantidad_material',
-        //     DB::raw('SUM(asignaciones.cantidad_material) as cantidad_material_asignado'),
-        //     DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
-        //     DB::raw('(presupuestos.cantidad_material * presupuestos.costo_material) as subtotal')
-        // )
-        // ->get();
+
+        $validator = Validator::make(["id" => $id], [
+            "id" => "required|exists:inmuebles,id",
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+        
+        //ESTO ES DE PRESUPUESTO
+        $validatorRequest = Validator::make($request->all(),[
+            "fecha_desde"=>"sometimes|nullable|date",
+            "fecha_hasta"=>"sometimes|nullable|date|after_or_equal:fecha_desde",
+        ]);
+
+        if ($validatorRequest->fails()) {
+            return ResponseHelper::error(422, $validatorRequest->errors()->first(), $validatorRequest->errors());
+        }
+
+        if($request->filled('fecha_desde')){
+            $fecha_desde= $request->fecha_desde;
+        }else{
+            $fecha_desde= 0;
+        }
+
+        if($request->filled('fecha_hasta')){
+            $fecha_hasta= $request->fecha_hasta;
+        }else{
+            $fecha_hasta= 0;
+        }
 
         DB::reconnect();
         $reportesInmuebles = DB::table('presupuestos')
@@ -249,6 +252,8 @@ class InmuebleController extends Controller
             })
             ->where("presupuestos.inmueble_id", $id)
             ->where("inmuebles.estado", "A")
+            ->orWhereDate('presupuestos.created_at','>=', $fecha_desde)
+            ->orWhereDate('presupuestos.created_at','<=', $fecha_hasta)
             ->groupBy(
 
                 'proyectos.codigo_proyecto',
@@ -290,54 +295,53 @@ class InmuebleController extends Controller
 
 
 
-            $archivoCSV = Writer::createFromString('');
-            $archivoCSV->setDelimiter(",");
-            $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+        $archivoCSV = Writer::createFromString('');
+        $archivoCSV->setDelimiter(",");
+        $archivoCSV->setOutputBOM(Writer::BOM_UTF8);
+        $archivoCSV->insertOne([
+            // "inmueble_id",
+            "referencia_material",
+            "nombre_material",
+
+            // "costo_material_presupuesto",
+            "Cantidad_material_presupuesto",
+            "subtotal_presupuesto",
+
+            // "costo_material_asignado",
+            "Cantidad_material_asignado",
+            "subtotal_asignado",
+            "restante"
+        ]);
+
+        foreach ($reportesInmuebles as $reporteInmueble) {
             $archivoCSV->insertOne([
-                // "inmueble_id",
-                "referencia_material",
-                "nombre_material",
+                // $reporteInmueble->inmueble_id,
+                $reporteInmueble->referencia_material,
+                $reporteInmueble->nombre_material,
 
-                // "costo_material_presupuesto",
-                "Cantidad_material_presupuesto",
-                "subtotal_presupuesto",
+                // $reporteInmueble->costo_material_presupuesto,
+                $reporteInmueble->cantidad_material_resupuesto,
+                $reporteInmueble->subtotal_presupuesto,
 
-                // "costo_material_asignado",
-                "Cantidad_material_asignado",
-                "subtotal_asignado",
-                "restante"
+                // $reporteInmueble->costo_material_asignado,
+                $reporteInmueble->cantidad_material_asignado,
+                $reporteInmueble->subtotal_asignado,
+
+                $reporteInmueble->restante,
             ]);
+        }
+        $response = new StreamedResponse(function () use ($archivoCSV) {
+            echo $archivoCSV->toString();
+        });
 
-            foreach ($reportesInmuebles as $reporteInmueble) {
-                $archivoCSV->insertOne([
-                    // $reporteInmueble->inmueble_id,
-                    $reporteInmueble->referencia_material,
-                    $reporteInmueble->nombre_material,
+        // Establece las cabeceras adecuadas
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
 
-                    // $reporteInmueble->costo_material_presupuesto,
-                    $reporteInmueble->cantidad_material_resupuesto,
-                    $reporteInmueble->subtotal_presupuesto,
-
-                    // $reporteInmueble->costo_material_asignado,
-                    $reporteInmueble->cantidad_material_asignado,
-                    $reporteInmueble->subtotal_asignado,
-
-                    $reporteInmueble->restante,
-                ]);
-            }
-            $response = new StreamedResponse(function () use ($archivoCSV) {
-                echo $archivoCSV->toString();
-            });
-
-            // Establece las cabeceras adecuadas
-            $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition', 'attachment; filename="reporte_presupuesto.csv"');
-
-            return $response;
-
+        return $response;
     }
 
-    public function generarReporteAsignacion($id)
+    public function generarReporteAsignacion($id, Request $request)
     {
         $validator = Validator::make(["id" => $id], [
             "id" => "required|exists:inmuebles,id",
@@ -348,7 +352,30 @@ class InmuebleController extends Controller
         }
 
         try {
+            $validatorRequest = Validator::make($request->all(), [
+                "fecha_desde" => "sometimes|nullable|date",
+                "fecha_hasta" => "sometimes|nullable|date|after_or_equal:fecha_desde",
+            ]);
+
+            if ($validatorRequest->fails()) {
+                return ResponseHelper::error(422, $validatorRequest->errors()->first(), $validatorRequest->errors());
+            }
+
+            if ($request->filled('fecha_desde')) {
+                $fecha_desde = $request->fecha_desde;
+            } else {
+                $fecha_desde = 0;
+            }
+
+            if ($request->filled('fecha_hasta')) {
+                $fecha_hasta = $request->fecha_hasta;
+            } else {
+                $fecha_hasta = 0;
+            }
+
             $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "asignaciones.materiale"])
+                ->orWhereDate('asignaciones.created_at', '>=', $fecha_desde)
+                ->orWhereDate('asignaciones.created_at', '<=', $fecha_hasta)
                 ->find($id);
 
 
