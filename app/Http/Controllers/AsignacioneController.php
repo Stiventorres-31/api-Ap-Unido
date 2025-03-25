@@ -116,18 +116,24 @@ class AsignacioneController extends Controller
 
 
                 //VALIDO SI LA CANTIDAD A ASIGNAR NO SUPERA A LA CANTIDAD DEL PRESUPUESTO
-                if ($datosPresupuesto->cantidad_material < $material["cantidad_material"]) {
-                    DB::rollBack();
-                    return ResponseHelper::error(
-                        422,
-                        "El material '{$material["referencia_material"]}' sobre pasa la cantidad del presupuesto"
-                    );
-                }
+
+                // if ($datosPresupuesto->cantidad_material < $material["cantidad_material"]) {
+                //     DB::rollBack();
+                //     return ResponseHelper::error(
+                //         422,
+                //         "El material '{$material["referencia_material"]}' sobre pasa la cantidad del presupuesto"
+                //     );
+                // }
+
+
+
+
                 //return $datosPresupuesto->cantidad_material;
 
 
 
                 //OBTENGO EL INVENTARIO DE LA REFERENCIA DEL MATERIAL CON EL CONSECUTIVO
+
                 $inventario = Inventario::where("materiale_id", $materialAsignar->id)
                     ->where("consecutivo", $material["consecutivo"])
                     ->where("estado", "A")
@@ -233,10 +239,12 @@ class AsignacioneController extends Controller
                 }
 
                 $proyecto = Proyecto::find(trim($request->proyecto_id));
+
                 if (!$proyecto) {
                     DB::rollback();
                     return ResponseHelper::error(404, "El proyecto no existe");
                 }
+
                 $materiale = Materiale::where("referencia_material", $datoAsignacionCSV["referencia_material"])->first();
 
                 if (!$materiale) {
@@ -281,20 +289,20 @@ class AsignacioneController extends Controller
 
                 //CALCULAR SI LA CANTIDAD ACTUAL Y LA ASIGNAR NO SUPERA A LA DEL PRESUPUESTO
 
-                $cantidadAsignadoActualmente = Asignacione::where("referencia_material", $materiale->referencia_material)
-                    ->where("inmueble_id", $datoAsignacionCSV["inmueble_id"])
-                    ->where("consecutivo", $inventario->consecutivo)
-                    ->max("cantidad_material") ?? 0;
+                // $cantidadAsignadoActualmente = Asignacione::where("referencia_material", $materiale->referencia_material)
+                //     ->where("inmueble_id", $datoAsignacionCSV["inmueble_id"])
+                //     ->where("consecutivo", $inventario->consecutivo)
+                //     ->max("cantidad_material") ?? 0;
 
-                $calcularCantidadTotal = $cantidadAsignadoActualmente + $datoAsignacionCSV["cantidad_material"];
+                // $calcularCantidadTotal = $cantidadAsignadoActualmente + $datoAsignacionCSV["cantidad_material"];
 
-                if ($calcularCantidadTotal > $presupuesto->cantidad_material) {
-                    DB::rollback();
-                    return ResponseHelper::error(
-                        400,
-                        "La cantidad a asignar del material '{$materiale->referencia_material}' al inmueble '{$datoAsignacionCSV["inmueble_id"]}' supera el stock del presupuesto"
-                    );
-                }
+                // if ($calcularCantidadTotal > $presupuesto->cantidad_material) {
+                //     DB::rollback();
+                //     return ResponseHelper::error(
+                //         400,
+                //         "La cantidad a asignar del material '{$materiale->referencia_material}' al inmueble '{$datoAsignacionCSV["inmueble_id"]}' supera el stock del presupuesto"
+                //     );
+                // }
 
                 //VERIFICAR SI HAY STOCK DISPONIBLE
 

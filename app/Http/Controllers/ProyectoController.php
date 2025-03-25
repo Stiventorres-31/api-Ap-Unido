@@ -69,15 +69,15 @@ class ProyectoController extends Controller
             return ResponseHelper::error(500, "Error interno en el servidor");
         }
     }
-    public function generarReporte($codigo_proyecto)
+    public function generarReporte($codigo_proyecto, Request $request)
     {
         $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
-            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto",
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto"
         ]);
-
         if ($validator->fails()) {
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
+
 
         try {
             //PROBAR EL withCount('presupuestos');
@@ -163,9 +163,36 @@ class ProyectoController extends Controller
         }
     }
 
-    public function generarReportePrueba($codigo_proyecto)
+    public function generarReportePrueba($codigo_proyecto,Request $request)
     {
+        $validator = Validator::make(["codigo_proyecto" => $codigo_proyecto], [
+            "codigo_proyecto" => "required|exists:proyectos,codigo_proyecto"
+        ]);
+        if ($validator->fails()) {
+            return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
+        }
+
         try {
+            $validatorRequest = Validator::make($request->all(),[
+                "fecha_desde"=>"sometimes|nullable|date",
+                "fecha_hasta"=>"sometimes|nullable|date|after_or_equal:fecha_desde",
+            ]);
+
+            if ($validatorRequest->fails()) {
+                return ResponseHelper::error(422, $validatorRequest->errors()->first(), $validatorRequest->errors());
+            }
+
+            if($request->filled('fecha_desde')){
+                $fecha_desde= $request->fecha_desde;
+            }else{
+                $fecha_desde= "";
+            }
+
+            if($request->filled('fecha_hasta')){
+                $fecha_hasta= $request->fecha_hasta;
+            }else{
+                $fecha_hasta= 0;
+            }
             $datos = DB::table('asignaciones')
                 ->join('presupuestos', function ($join) {
                     $join->on('asignaciones.inmueble_id', '=', 'presupuestos.inmueble_id')
@@ -176,6 +203,8 @@ class ProyectoController extends Controller
                 ->join('materiales', 'asignaciones.materiale_id', '=', 'materiales.id')
                 ->join('proyectos', 'asignaciones.proyecto_id', '=', 'proyectos.id')
                 ->where('proyectos.codigo_proyecto', $codigo_proyecto)
+                ->orWhereDate('proyectos.created_at','>=', $fecha_desde)
+                ->orWhereDate('proyectos.created_at','<=', $fecha_hasta)
                 ->groupBy(
                     'asignaciones.inmueble_id',
                     'proyectos.codigo_proyecto',
@@ -200,6 +229,7 @@ class ProyectoController extends Controller
                     DB::raw('(presupuestos.cantidad_material - COALESCE(SUM(asignaciones.cantidad_material), 0)) as restante'),
 
                 )
+
                 ->get();
 
 
