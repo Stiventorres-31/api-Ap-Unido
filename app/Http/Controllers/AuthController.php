@@ -21,8 +21,9 @@ class AuthController extends Controller
                 return ResponseHelper::error(401, "Las credenciales no son correctas", []);
             }
         } catch (JWTException  $e ) {
-
+            Log::error("error al intentar realizar el login " . $e->getMessage());
             return ResponseHelper::error(422, "No se ha podido iniciar sesion", []);
+
         }catch (Throwable $th){
             Log::error("error al intentar realizar el login " . $th->getMessage());
             return ResponseHelper::error(500, "Error interno en el servidor");
