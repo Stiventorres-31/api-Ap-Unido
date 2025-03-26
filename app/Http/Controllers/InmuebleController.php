@@ -404,9 +404,9 @@ class InmuebleController extends Controller
                 "nombre_material",
                 "consecutivo",
                 "costo_material",
-                "cantidad_material",
+                "cantidad_material_asignado",
                 "subtotal",
-                "cantidad_presupuestado",
+                "cantidad_material_presupuestado",
                 "fecha_asignacion",
                 // "porcentaje_usado"
             ]);
