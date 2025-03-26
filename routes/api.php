@@ -64,16 +64,16 @@ Route::middleware("auth:api")->group(function(){
         Route::get("/presupuesto/{codigo_proyecto}", [ProyectoController::class, "showWithPresupuesto"]);
         Route::get("/asignacion/{codigo_proyecto}", [ProyectoController::class, "showWithAsignacion"]);
         Route::delete("/", [ProyectoController::class, 'destroy']);
-        
-        Route::get("/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
+
+        Route::post("/report/{codigo_proyecto}", [ProyectoController::class, "generarReportePrueba"]);
     });
 
     Route::middleware("rol")->prefix('inmueble')->group(function () {
         Route::get("/", [InmuebleController::class, "index"]);
         Route::get("/{id}", [InmuebleController::class, "show"]);
         Route::post("/", [InmuebleController::class, "store"]);
-        Route::get("/report/{id}", [InmuebleController::class, "generarReportePrueba"]);
-        Route::get("/report/asignacion/{id}", [InmuebleController::class, "generarReporteAsignacion"]);
+        Route::post("/report/{id}", [InmuebleController::class, "generarReportePrueba"]);
+        Route::post("/report/asignacion/{id}", [InmuebleController::class, "generarReporteAsignacion"]);
         // Route::put("/{id}", [InmuebleController::class, "edit"]);
         Route::delete("/", [InmuebleController::class, 'destroy']);
 
