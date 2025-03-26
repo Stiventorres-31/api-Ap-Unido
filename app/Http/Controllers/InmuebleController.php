@@ -413,7 +413,7 @@ class InmuebleController extends Controller
 
             foreach ($inmueble as $asignacion) {
                 $presupuesto = Presupuesto::select("cantidad_material")->where("inmueble_id", $id)
-                    ->where("materiale_id", $asignacion->materiale_id)
+                    ->where("materiale_id", $asignacion["materiale_id"])
                     ->first();
 
                 $archivoCSV->insertOne([
