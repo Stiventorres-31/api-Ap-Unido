@@ -218,7 +218,7 @@ class InmuebleController extends Controller
         if ($validator->fails()) {
             return ResponseHelper::error(422, $validator->errors()->first(), $validator->errors());
         }
-        
+
         //ESTO ES DE PRESUPUESTO
         $validatorRequest = Validator::make($request->all(),[
             "fecha_desde"=>"sometimes|nullable|date",
@@ -373,7 +373,7 @@ class InmuebleController extends Controller
                 $fecha_hasta = 0;
             }
 
-            $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "asignaciones.materiale"])
+            $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "asignaciones","asignaciones.materiale"])
                 ->orWhereDate('asignaciones.created_at', '>=', $fecha_desde)
                 ->orWhereDate('asignaciones.created_at', '<=', $fecha_hasta)
                 ->find($id);
