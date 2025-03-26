@@ -220,25 +220,25 @@ class InmuebleController extends Controller
         }
 
         //ESTO ES DE PRESUPUESTO
-        $validatorRequest = Validator::make($request->all(),[
-            "fecha_desde"=>"sometimes|nullable|date",
-            "fecha_hasta"=>"sometimes|nullable|date|after_or_equal:fecha_desde",
+        $validatorRequest = Validator::make($request->all(), [
+            "fecha_desde" => "sometimes|nullable|date",
+            "fecha_hasta" => "sometimes|nullable|date|after_or_equal:fecha_desde",
         ]);
 
         if ($validatorRequest->fails()) {
             return ResponseHelper::error(422, $validatorRequest->errors()->first(), $validatorRequest->errors());
         }
 
-        if($request->filled('fecha_desde')){
-            $fecha_desde= $request->fecha_desde;
-        }else{
-            $fecha_desde= 0;
+        if ($request->filled('fecha_desde')) {
+            $fecha_desde = $request->fecha_desde;
+        } else {
+            $fecha_desde = 0;
         }
 
-        if($request->filled('fecha_hasta')){
-            $fecha_hasta= $request->fecha_hasta;
-        }else{
-            $fecha_hasta= 0;
+        if ($request->filled('fecha_hasta')) {
+            $fecha_hasta = $request->fecha_hasta;
+        } else {
+            $fecha_hasta = 0;
         }
 
         DB::reconnect();
@@ -252,8 +252,8 @@ class InmuebleController extends Controller
             })
             ->where("presupuestos.inmueble_id", $id)
             ->where("inmuebles.estado", "A")
-            ->orWhereDate('presupuestos.created_at','>=', $fecha_desde)
-            ->orWhereDate('presupuestos.created_at','<=', $fecha_hasta)
+            ->orWhereDate('presupuestos.created_at', '>=', $fecha_desde)
+            ->orWhereDate('presupuestos.created_at', '<=', $fecha_hasta)
             ->groupBy(
 
                 'proyectos.codigo_proyecto',
@@ -373,13 +373,22 @@ class InmuebleController extends Controller
                 $fecha_hasta = 0;
             }
 
-            $inmueble = Inmueble::with(["proyecto", "tipo_inmueble", "asignaciones","asignaciones.materiale"])
+            // $inmueble = Inmueble::with(["proyecto", "tipo_inmueble","asignaciones.materiale"])
+            //     ->orWhereDate('inmuebles.created_at', '>=', $fecha_desde)
+            //     ->orWhereDate('inmuebles.created_at', '<=', $fecha_hasta)
+            //     ->find($id);
+
+            //EL FILTRADO DE LAS FECHAS DE HACEN POR LA FECHA QUE SE REGISTRO LA ASIGNACION HACIA ESE INMUEBLE
+
+            $inmueble = Asignacione::with(["proyecto", "inmueble.tipo_inmueble", "materiale"])
+                ->where("inmueble_id", $id)
                 ->orWhereDate('asignaciones.created_at', '>=', $fecha_desde)
                 ->orWhereDate('asignaciones.created_at', '<=', $fecha_hasta)
-                ->find($id);
+                ->get();
 
+            //return response()->json($inmueble);
 
-            if (!$inmueble->asignaciones) {
+            if (!$inmueble) {
                 return ResponseHelper::error(404, "Este inmueble no tiene asignaciones");
             }
 
@@ -390,24 +399,29 @@ class InmuebleController extends Controller
             $archivoCSV->insertOne([
                 "codigo_proyecto",
                 // "inmueble_id",
+                "tipo_vehiculo",
                 "referencia_material",
-                "mombre_material",
+                "nombre_material",
                 "consecutivo",
                 "costo_material",
-                "Cantidad_material",
+                "cantidad_material",
                 "subtotal",
                 "cantidad_presupuestado",
                 "fecha_asignacion",
                 // "porcentaje_usado"
             ]);
 
-            foreach ($inmueble->asignaciones as $asignacion) {
+            foreach ($inmueble as $asignacion) {
                 $presupuesto = Presupuesto::select("cantidad_material")->where("inmueble_id", $id)
                     ->where("materiale_id", $asignacion->materiale_id)
                     ->first();
+
                 $archivoCSV->insertOne([
-                    $inmueble->proyecto->codigo_proyecto,
+                    // $inmueble->proyecto->codigo_proyecto,
                     // $presupuesto["inmueble_id"],
+
+                    $asignacion["proyecto"]["codigo_proyecto"],
+                    $asignacion["inmueble"]["tipo_inmueble"]["nombre_tipo_inmueble"],
                     $asignacion["materiale"]["referencia_material"],
                     $asignacion["materiale"]["nombre_material"],
                     $asignacion["consecutivo"],
